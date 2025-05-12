@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Quản Lý Khách Hàng Mua Xôi</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #ffd3b6, #ffaaa5);
+      color: #222;
+      height: 100vh;
+      max-width: 350px;
+      max-height: 600px;
+      overflow: hidden;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(255 128 0 / 0.4);
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px 6px 12px;
+      background: #fffefcdd;
+      box-shadow: 0 2px 12px #a4d7a7bb;
+      border-radius: 10px 10px 0 0;
+    }
+    header h1 {
+      font-weight: 700;
+      color: #663300;
+      text-shadow: 0 0 5px #fff3e0;
+      font-size: 1.3rem;
+      margin: 0;
+      user-select: none;
+      flex: 1;
+      text-align: center;
+    }
+    button#toggleFormBtn {
+      background: #6a994e;
+      border: none;
+      color: white;
+      padding: 8px 14px;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgb(106 153 78 / 0.7);
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+    button#toggleFormBtn:hover {
+      background: #7caf58;
+    }
+
+    /* Customer list container fills rest */
+    #listContainer {
+      flex: 1;
+      background: #fffdfa99;
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 6px 15px #e7e4dc88 inset;
+      padding: 12px 14px 8px 14px;
+      overflow-y: auto;
+      font-size: 0.9rem;
+      color: #392f00;
+      outline: none;
+    }
+    #listContainer:focus {
+      box-shadow: 0 0 8px #6a994eaa inset;
+    }
+    #customerList h2 {
+      margin: 0 0 14px 0;
+      color: #3a2700;
+      font-weight: 700;
+      text-shadow: 0 0 3px #fff5dc;
+      font-size: 1.1rem;
+      user-select: none;
+    }
+    .customer-card {
+      background: #f4eed9cc;
+      border-radius: 8px;
+      box-shadow: 0 3px 10px #c1b686cc;
+      padding: 10px;
+      margin-bottom: 10px;
+      color: #392f00;
+      word-wrap: break-word;
+      user-select: text;
+    }
+    .customer-card p {
+      margin: 5px 0;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+    .customer-card .order-item {
+      margin-left: 12px;
+      font-weight: normal;
+      font-style: italic;
+      color: #665832cc;
+      font-size: 0.87rem;
+    }
+
+    #summary {
+      background: #dce8d7cc;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-weight: 700;
+      color: #2f442c;
+      box-shadow: 0 6px 12px #bccbb18a inset;
+      user-select: none;
+      font-size: 0.9rem;
+      margin-top: 10px;
+      text-align: center;
+    }
+    #summary span {
+      display: inline-block;
+      min-width: 110px;
+      margin: 3px 5px;
+    }
+
+    /* Form panel styles - initially hidden */
+    #formPanel {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      width: 320px;
+      max-width: 95vw;
+      max-height: 570px;
+      background: #fffefcee;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      padding: 12px 16px;
+      display: none;
+      flex-direction: column;
+      z-index: 1000;
+      user-select: text;
+    }
+    #formPanel.visible {
+      display: flex;
+      animation: slideIn 0.3s ease forwards;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(110%); opacity: 0; }
+      to { transform: translateX(0%); opacity: 1; }
+    }
+    @keyframes slideOut {
+      from { transform: translateX(0%); opacity: 1; }
+      to { transform: translateX(110%); opacity: 0; }
+    }
+
+    #formPanel header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 6px;
+      border-bottom: 1.5px solid #a4d7a7bb;
+    }
+    #formPanel header h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 0;
+      color: #663300;
+      user-select: none;
+    }
+    #closeFormBtn {
+      background: transparent;
+      border: none;
+      font-size: 1.4rem;
+      line-height: 1;
+      font-weight: 700;
+      color: #663300aa;
+      cursor: pointer;
+      user-select: none;
+      border-radius: 6px;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.3s ease;
+    }
+    #closeFormBtn:hover {
+      color: #663300;
+      background: #ffdbc2;
+    }
+
+    form#customerForm {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 2px;
+      margin-top: 6px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: 600;
+      color: #4a452a;
+      font-size: 0.9rem;
+      user-select: none;
+    }
+
+    input[type="text"], input[type="tel"], select, input[type="number"] {
+      width: 100%;
+      padding: 7px;
+      margin-top: 4px;
+      border-radius: 5px;
+      border: 1.5px solid #a19f9e;
+      font-size: 0.9rem;
+      transition: border-color 0.3s ease;
+    }
+    input[type="text"]:focus, input[type="tel"]:focus, select:focus, input[type="number"]:focus {
+      outline: none;
+      border-color: #6a994e;
+      box-shadow: 0 0 5px #6a994e88;
+    }
+
+    .dish-section {
+      border: 1.5px solid #c9d6aa;
+      padding: 8px 10px;
+      border-radius: 8px;
+      margin-top: 12px;
+      background: #f6f9edcc;
+      user-select: none;
+    }
+    .dish-section > h3 {
+      margin: 0 0 6px 0;
+      color: #557a18;
+      font-weight: 700;
+      font-size: 1rem;
+      text-shadow: 0 0 2px #d2e2b3;
+    }
+
+    .quantity-input {
+      display: flex;
+      align-items: center;
+      margin-top: 4px;
+    }
+    .quantity-input label {
+      margin-right: 6px;
+      margin-top: 0;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    input[type="number"].qty {
+      width: 60px;
+      padding: 5px;
+      font-size: 0.9rem;
+      margin-left: auto;
+      border-radius: 5px;
+    }
+
+    .options-group {
+      margin-top: 8px;
+      user-select: none;
+    }
+    .option-item {
+      margin-top: 5px;
+      font-size: 0.85rem;
+    }
+    .option-item > label {
+      font-weight: 500;
+      margin-left: 6px;
+      color: #3f3f13;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .inline-radio {
+      display: inline-flex;
+      align-items: center;
+      margin-right: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      color: #3f3f13;
+      font-size: 0.85rem;
+      user-select: none;
+    }
+    .inline-radio input[type="radio"] {
+      margin-right: 4px;
+      cursor: pointer;
+    }
+    .inline-checkbox {
+      display: inline-flex;
+      align-items: center;
+      margin-right: 10px;
+      font-weight: 500;
+      cursor: pointer;
+      color: #3f3f13;
+      font-size: 0.85rem;
+      user-select: none;
+    }
+    .inline-checkbox input[type="checkbox"] {
+      margin-right: 4px;
+      cursor: pointer;
+    }
+
+    button[type="submit"] {
+      margin: 14px 0 0;
+      width: 100%;
+      padding: 10px 0;
+      border: none;
+      border-radius: 8px;
+      background: #c27ba0;
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 5px 15px #bf8cae99;
+      transition: background-color 0.3s;
+      user-select: none;
+    }
+    button[type="submit"]:hover:not(:disabled){
+      background: #d084b0;
+    }
+    button[type="submit"]:disabled {
+      background: #cbb0bf88;
+      cursor: not-allowed;
+    }
+
+    /* Scrollbars for forms and list on small sizes */
+    form::-webkit-scrollbar, #customerList::-webkit-scrollbar {
+      width: 7px;
+    }
+    form::-webkit-scrollbar-track, #customerList::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    form::-webkit-scrollbar-thumb, #customerList::-webkit-scrollbar-thumb {
+      background: #a5c88aaa;
+      border-radius: 10px;
+    }
+
+    /* Overlay dim */
+    #overlayDim {
+      position: fixed;
+      top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.15);
+      z-index: 900;
+      display: none;
+      backdrop-filter: blur(2px);
+    }
+    #overlayDim.visible {
+      display: block;
+    }
+
+    /* Responsive adjustments */
+    @media screen and (max-width: 380px) {
+      #formPanel {
+        width: 95vw;
+        max-height: 85vh;
+        top: 7vh;
+        right: 2.5vw;
+        border-radius: 12px;
+      }
+      #listContainer {
+        padding: 10px 12px 6px 12px;
+      }
+      header h1 {
+        font-size: 1.15rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <button id="toggleFormBtn" aria-expanded="false" aria-controls="formPanel" aria-haspopup="dialog" aria-label="Mở form lưu khách hàng">
+      Lưu khách hàng
+    </button>
+    <h1>Quản Lý Khách Hàng Mua Xôi</h1>
+  </header>
+
+  <main id="listContainer" tabindex="0" aria-label="Danh sách khách hàng và tổng kết">
+    <h2 id="customerListTitle">Danh sách khách hàng</h2>
+    <section id="customerList" aria-live="polite" aria-relevant="additions" aria-labelledby="customerListTitle" tabindex="0">
+      <!-- Customer cards inserted here -->
+    </section>
+    <section id="summary" aria-label="Tổng kết thống kê">
+      <span id="totalCustomers">Số khách hàng: 0</span><br />
+      <span id="totalQuantity">Tổng số suất bán ra: 0</span><br />
+      <span id="totalRevenue">Tổng tiền thu được: 0đ</span>
+    </section>
+  </main>
+
+  <div id="overlayDim" tabindex="-1" aria-hidden="true"></div>
+
+  <aside id="formPanel" role="dialog" aria-modal="true" aria-labelledby="formPanelTitle" aria-hidden="true">
+    <header>
+      <h2 id="formPanelTitle">Lưu khách hàng</h2>
+      <button id="closeFormBtn" aria-label="Đóng form lưu khách hàng">&times;</button>
+    </header>
+    <form id="customerForm" autocomplete="off" novalidate>
+      <label for="nameInput">Tên người mua *</label>
+      <input type="text" id="nameInput" name="name" required placeholder="Nhập tên người mua" autocomplete="name" />
+
+      <label for="addressInput">Địa chỉ *</label>
+      <input type="text" id="addressInput" name="address" required placeholder="Nhập địa chỉ" />
+
+      <label for="phoneInput">Số điện thoại *</label>
+      <input type="tel" id="phoneInput" name="phone" required placeholder="Nhập số điện thoại" pattern="[0-9+ ()\-]{7,15}" maxlength="15" />
+
+      <!-- Xôi Thịt Kho Section -->
+      <section class="dish-section" aria-labelledby="sectionXoiThitKho">
+        <h3 id="sectionXoiThitKho">Xôi Thịt Kho (25.000đ/suất)</h3>
+        <div class="quantity-input">
+          <label for="thitKhoQty">Số lượng:</label>
+          <input type="number" id="thitKhoQty" name="thitKhoQty" class="qty" min="0" value="0" />
+        </div>
+        <div class="options-group" id="thitKhoOptions" aria-label="Chọn ghi chú xôi thịt kho">
+
+          <div class="option-item" role="group" aria-labelledby="labelCha">
+            <label id="labelCha" style="font-weight:600;">Chả:</label>
+            <label class="inline-radio"><input type="radio" name="cha" value="nhiều chả">Nhiều chả</label>
+            <label class="inline-radio"><input type="radio" name="cha" value="ít chả">Ít chả</label>
+            <label class="inline-radio"><input type="radio" name="cha" value="" checked>Không chọn</label>
+          </div>
+
+          <div class="option-item" role="group" aria-labelledby="labelDo">
+            <label id="labelDo" style="font-weight:600;">Đỗ:</label>
+            <label class="inline-radio"><input type="radio" name="do" value="nhiều đỗ">Nhiều đỗ</label>
+            <label class="inline-radio"><input type="radio" name="do" value="ít đỗ">Ít đỗ</label>
+            <label class="inline-radio"><input type="radio" name="do" value="" checked>Không chọn</label>
+          </div>
+
+          <div class="option-item" role="group" aria-labelledby="labelHanh">
+            <label id="labelHanh" style="font-weight:600;">Hành:</label>
+            <label class="inline-radio"><input type="radio" name="hanh" value="nhiều hành">Nhiều hành</label>
+            <label class="inline-radio"><input type="radio" name="hanh" value="ít hành">Ít hành</label>
+            <label class="inline-radio"><input type="radio" name="hanh" value="không hành" checked>Không hành</label>
+          </div>
+
+          <div class="option-item" role="group" aria-labelledby="labelNuocThit">
+            <label id="labelNuocThit" style="font-weight:600;">Nước thịt:</label>
+            <label class="inline-radio"><input type="radio" name="nuocThit" value="nhiều nước thịt">Nhiều</label>
+            <label class="inline-radio"><input type="radio" name="nuocThit" value="ít nước thịt">Ít</label>
+            <label class="inline-radio"><input type="radio" name="nuocThit" value="không có nước thịt" checked>Không có nước thịt</label>
+          </div>
+
+          <div class="option-item" style="margin-top:10px;">
+            <label class="inline-checkbox">
+              <input type="checkbox" name="thitKhoToppingTrung" value="trứng ốp" />
+              Thêm topping: Trứng ốp (+5.000đ)
+            </label>
+          </div>
+
+          <div class="option-item">
+            <label class="inline-checkbox">
+              <input type="checkbox" name="thitKhoToppingChaCa" value="chả cá" />
+              Thêm topping: Chả cá (+10.000đ)
+            </label>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Xôi Ruốc Section -->
+      <section class="dish-section" aria-labelledby="sectionXoiRuoc">
+        <h3 id="sectionXoiRuoc">Xôi Ruốc (15.000đ/suất)</h3>
+
+        <div class="quantity-input">
+          <label for="ruocQty">Số lượng:</label>
+          <input type="number" id="ruocQty" name="ruocQty" class="qty" min="0" value="0" />
+        </div>
+        <div class="options-group" id="ruocOptions" aria-label="Chọn topping xôi ruốc">
+          <div class="option-item" style="margin-top:10px;">
+            <label class="inline-checkbox">
+              <input type="checkbox" name="ruocToppingTrung" value="trứng ốp" />
+              Thêm topping: Trứng ốp (+5.000đ)
+            </label>
+          </div>
+
+          <div class="option-item">
+            <label class="inline-checkbox">
+              <input type="checkbox" name="ruocToppingCha" value="chả" />
+              Thêm topping: Chả (+10.000đ)
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <button type="submit" id="submitBtn" disabled>Lưu</button>
+    </form>
+  </aside>
+
+  <script>
+    (function(){
+      // Prices
+      const PRICE_THIT_KHO = 25000;
+      const PRICE_XOI_RUOC = 15000;
+      const TOPPING_TRUNG_PRICE = 5000;
+      const TOPPING_CHA_CA_PRICE = 10000;
+      const TOPPING_CHA_PRICE = 10000;
+
+      // Elements
+      const toggleBtn = document.getElementById('toggleFormBtn');
+      const formPanel = document.getElementById('formPanel');
+      const closeFormBtn = document.getElementById('closeFormBtn');
+      const overlayDim = document.getElementById('overlayDim');
+      const form = document.getElementById('customerForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const customerListEl = document.getElementById('customerList');
+      const totalCustomersEl = document.getElementById('totalCustomers');
+      const totalQuantityEl = document.getElementById('totalQuantity');
+      const totalRevenueEl = document.getElementById('totalRevenue');
+
+      // Inputs
+      const nameInput = document.getElementById('nameInput');
+      const addressInput = document.getElementById('addressInput');
+      const phoneInput = document.getElementById('phoneInput');
+      const thitKhoQtyInput = document.getElementById('thitKhoQty');
+      const ruocQtyInput = document.getElementById('ruocQty');
+
+      // Enable submit only if required fields filled and at least one qty > 0
+      function checkFormValidity() {
+        const valid =
+          nameInput.value.trim() !== '' &&
+          addressInput.value.trim() !== '' &&
+          phoneInput.value.trim() !== '' &&
+          (parseInt(thitKhoQtyInput.value, 10) > 0 || parseInt(ruocQtyInput.value, 10) > 0);
+        submitBtn.disabled = !valid;
+      }
+      nameInput.addEventListener('input', checkFormValidity);
+      addressInput.addEventListener('input', checkFormValidity);
+      phoneInput.addEventListener('input', checkFormValidity);
+      thitKhoQtyInput.addEventListener('input', checkFormValidity);
+      ruocQtyInput.addEventListener('input', checkFormValidity);
+
+      // Show form panel
+      function showForm() {
+        formPanel.classList.add('visible');
+        overlayDim.classList.add('visible');
+        formPanel.setAttribute('aria-hidden', 'false');
+        toggleBtn.setAttribute('aria-expanded', 'true');
+        nameInput.focus();
+      }
+
+      // Hide form panel
+      function hideForm() {
+        formPanel.classList.remove('visible');
+        overlayDim.classList.remove('visible');
+        formPanel.setAttribute('aria-hidden', 'true');
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        toggleBtn.focus();
+      }
+
+      toggleBtn.addEventListener('click', showForm);
+      closeFormBtn.addEventListener('click', hideForm);
+      overlayDim.addEventListener('click', hideForm);
+
+      // Keyboard: close form on Esc key
+      document.addEventListener('keydown', e => {
+        if(e.key === 'Escape' && formPanel.classList.contains('visible')){
+          hideForm();
+        }
+      });
+
+      // Helper to get selected radio value or empty string
+      function getRadioValue(name) {
+        const radios = form.querySelectorAll('input[name="' + name + '"]');
+        for(let r of radios){
+          if(r.checked) return r.value;
+        }
+        return '';
+      }
+
+      // Helper to format money with thousand separators and đ
+      function formatMoney(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + 'đ';
+      }
+
+      // Calculate price of one portion xôi thịt kho based on selected options
+      function calculateThitKhoExtra() {
+        let extra = 0;
+        if(form['thitKhoToppingTrung'].checked) extra += TOPPING_TRUNG_PRICE;
+        if(form['thitKhoToppingChaCa'].checked) extra += TOPPING_CHA_CA_PRICE;
+        return extra;
+      }
+
+      // Calculate price of one portion xôi ruốc based on toppings
+      function calculateRuocExtra() {
+        let extra = 0;
+        if(form['ruocToppingTrung'].checked) extra += TOPPING_TRUNG_PRICE;
+        if(form['ruocToppingCha'].checked) extra += TOPPING_CHA_PRICE;
+        return extra;
+      }
+
+      // Render customer list and summary from localStorage
+      function renderCustomers() {
+        let customers = JSON.parse(localStorage.getItem('xoiCustomers')||'[]');
+        customerListEl.querySelectorAll('.customer-card').forEach(el => el.remove());
+
+        let totalCustomers = customers.length;
+        let totalQty = 0;
+        let totalRevenue = 0;
+
+        for (let c of customers){
+          totalQty += (c.thitKhoQty + c.ruocQty);
+          totalRevenue += c.totalPrice;
+
+          // Build option notes for thịt kho
+          let thitKhoNotes = [];
+          if(c.thitKhoQty > 0){
+            if(c.optionsChả) thitKhoNotes.push(c.optionsChả);
+            if(c.optionsĐỗ) thitKhoNotes.push(c.optionsĐỗ);
+            if(c.optionsHành) thitKhoNotes.push(c.optionsHành);
+            if(c.optionsNướcThịt) thitKhoNotes.push(c.optionsNướcThịt);
+            let toppings = [];
+            if(c.optionsToppingTrung) toppings.push('Trứng ốp');
+            if(c.optionsToppingChảCá) toppings.push('Chả cá');
+            if(toppings.length) thitKhoNotes.push('Thêm topping: ' + toppings.join(', '));
+          }
+
+          // xôi ruốc toppings notes
+          let ruocNotes = [];
+          if(c.ruocQty > 0){
+            let ruocToppings = [];
+            if(c.optionsToppingTrungRuoc) ruocToppings.push('Trứng ốp');
+            if(c.optionsToppingChảRuoc) ruocToppings.push('Chả');
+            if(ruocToppings.length) ruocNotes.push('Thêm topping: ' + ruocToppings.join(', '));
+          }
+
+          // Build display text
+          let thitKhoText = c.thitKhoQty > 0 ? (c.thitKhoQty + ' x Xôi Thịt Kho') : '';
+          let ruocText = c.ruocQty > 0 ? (c.ruocQty + ' x Xôi Ruốc') : '';
+
+          const card = document.createElement('article');
+          card.className = 'customer-card';
+
+          let innerHTML = '<p><strong>' + escapeHTML(c.name) + '</strong></p><p>Địa chỉ: ' + escapeHTML(c.address) + '</p><p>SDT: ' + escapeHTML(c.phone) + '</p><p><strong>Đơn hàng:</strong></p>';
+
+          if(thitKhoText) {
+            innerHTML += '<p class="order-item">' + thitKhoText;
+            if(thitKhoNotes.length) innerHTML += ' (' + escapeHTML(thitKhoNotes.join(', ')) + ')';
+            innerHTML += '</p>';
+          }
+          if(ruocText) {
+            innerHTML += '<p class="order-item">' + ruocText;
+            if(ruocNotes.length) innerHTML += ' (' + escapeHTML(ruocNotes.join(', ')) + ')';
+            innerHTML += '</p>';
+          }
+          innerHTML += '<p><strong>Tổng tiền:</strong> ' + formatMoney(c.totalPrice) + '</p>';
+
+          card.innerHTML = innerHTML;
+          customerListEl.appendChild(card);
+        }
+        totalCustomersEl.textContent = 'Số khách hàng: ' + totalCustomers;
+        totalQuantityEl.textContent = 'Tổng số suất bán ra: ' + totalQty;
+        totalRevenueEl.textContent = 'Tổng tiền thu được: ' + formatMoney(totalRevenue);
+      }
+
+      // Escape HTML to prevent injection for user input display
+      function escapeHTML(str){
+        if(!str) return '';
+        return str.replace(/[&<>"']/g, (m) => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        })[m]);
+      }
+
+      // On submit handler
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+
+        // Collect data
+        let name = nameInput.value.trim();
+        let address = addressInput.value.trim();
+        let phone = phoneInput.value.trim();
+        let thitKhoQty = Math.max(0, +thitKhoQtyInput.value);
+        let ruocQty = Math.max(0, +ruocQtyInput.value);
+
+        if(thitKhoQty === 0 && ruocQty === 0){
+          alert('Bạn phải chọn ít nhất một suất xôi.');
+          return;
+        }
+
+        // Collect options thịt kho
+        let optionsChả = getRadioValue('cha');
+        let optionsĐỗ = getRadioValue('do');
+        let optionsHành = getRadioValue('hanh');
+        let optionsNướcThịt = getRadioValue('nuocThit');
+        optionsChả = (optionsChả === '' || optionsChả.toLowerCase().includes('không')) ? '' : optionsChả;
+        optionsĐỗ = (optionsĐỗ === '' || optionsĐỗ.toLowerCase().includes('không')) ? '' : optionsĐỗ;
+        optionsHành = (optionsHành === '' || optionsHành.toLowerCase().includes('không')) ? '' : optionsHành;
+        optionsNướcThịt = (optionsNướcThịt === '' || optionsNướcThịt.toLowerCase().includes('không')) ? '' : optionsNướcThịt;
+
+        let optionsToppingTrung = form['thitKhoToppingTrung'].checked;
+        let optionsToppingChảCá = form['thitKhoToppingChaCa'].checked;
+
+        // Collect options ruốc
+        let optionsToppingTrungRuoc = form['ruocToppingTrung'].checked;
+        let optionsToppingChảRuoc = form['ruocToppingCha'].checked;
+
+        // Calculate total price
+        let totalPriceThitKho = thitKhoQty * (PRICE_THIT_KHO + calculateThitKhoExtra());
+        let totalPriceRuoc = ruocQty * (PRICE_XOI_RUOC + calculateRuocExtra());
+        let totalPrice = totalPriceThitKho + totalPriceRuoc;
+
+        let customer = {
+          name, address, phone,
+          thitKhoQty, ruocQty,
+          optionsChả,
+          optionsĐỗ,
+          optionsHành,
+          optionsNướcThịt,
+          optionsToppingTrung,
+          optionsToppingChảCá,
+          optionsToppingTrungRuoc,
+          optionsToppingChảRuoc,
+          totalPrice
+        };
+
+        // Load current list
+        let customers = JSON.parse(localStorage.getItem('xoiCustomers')||'[]');
+        customers.push(customer);
+        localStorage.setItem('xoiCustomers', JSON.stringify(customers));
+
+        // Reset form
+        form.reset();
+        thitKhoQtyInput.value = '0';
+        ruocQtyInput.value = '0';
+        submitBtn.disabled = true;
+
+        // Hide form
+        hideForm();
+
+        // Render updated list and summary
+        renderCustomers();
+      });
+
+      // Initial render on page load
+      renderCustomers();
+
+    })();
+  </script>
+</body>
+</html>
+

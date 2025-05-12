@@ -105,6 +105,7 @@
       color: #392f00;
       word-wrap: break-word;
       user-select: text;
+      position: relative;
     }
     .customer-card p {
       margin: 5px 0;
@@ -117,6 +118,34 @@
       font-style: italic;
       color: #665832cc;
       font-size: 0.87rem;
+    }
+    .customer-card .action-buttons {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      display: flex;
+      gap: 6px;
+    }
+    .customer-card button.action-btn {
+      background: #c27ba0;
+      border: none;
+      color: white;
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px #bf8cae99;
+      transition: background-color 0.3s;
+      user-select: none;
+    }
+    .customer-card button.action-btn:hover {
+      background: #d084b0;
+    }
+    .customer-card button.action-btn.delete {
+      background: #bb5a61;
+    }
+    .customer-card button.action-btn.delete:hover {
+      background: #d3666f;
     }
 
     #summary {
@@ -530,6 +559,9 @@
       const thitKhoQtyInput = document.getElementById('thitKhoQty');
       const ruocQtyInput = document.getElementById('ruocQty');
 
+      // Track edit state
+      let editingIndex = -1; // -1 means adding new
+
       // Enable submit only if required fields filled and at least one qty > 0
       function checkFormValidity() {
         const valid =
@@ -554,16 +586,35 @@
         nameInput.focus();
       }
 
-      // Hide form panel
+      // Hide form panel and reset form to default add mode
       function hideForm() {
         formPanel.classList.remove('visible');
         overlayDim.classList.remove('visible');
         formPanel.setAttribute('aria-hidden', 'true');
         toggleBtn.setAttribute('aria-expanded', 'false');
         toggleBtn.focus();
+        resetForm();
       }
 
-      toggleBtn.addEventListener('click', showForm);
+      // Reset form to blank inputs and 'add' mode
+      function resetForm() {
+        form.reset();
+        thitKhoQtyInput.value = '0';
+        ruocQtyInput.value = '0';
+        submitBtn.disabled = true;
+        editingIndex = -1;
+        submitBtn.textContent = 'Lưu';
+      }
+
+      toggleBtn.addEventListener('click', () => {
+        // If form visible, hide it; else show form for new entry
+        if(formPanel.classList.contains('visible')){
+          hideForm();
+        } else {
+          resetForm();
+          showForm();
+        }
+      });
       closeFormBtn.addEventListener('click', hideForm);
       overlayDim.addEventListener('click', hideForm);
 
@@ -581,6 +632,21 @@
           if(r.checked) return r.value;
         }
         return '';
+      }
+
+      // Helper to set radio value or default to none
+      function setRadioValue(name, value){
+        const radios = form.querySelectorAll('input[name="' + name + '"]');
+        let found = false;
+        radios.forEach(r => {
+          if(r.value === value){
+            r.checked = true;
+            found = true;
+          } else {
+            r.checked = false;
+          }
+        });
+        if(!found && radios.length) radios[radios.length-1].checked = true; // last radio is "Không chọn"
       }
 
       // Helper to format money with thousand separators and đ
@@ -604,6 +670,28 @@
         return extra;
       }
 
+      // Prefill form with existing customer data for editing
+      function fillForm(customer){
+        nameInput.value = customer.name;
+        addressInput.value = customer.address;
+        phoneInput.value = customer.phone;
+        thitKhoQtyInput.value = customer.thitKhoQty;
+        ruocQtyInput.value = customer.ruocQty;
+        // thịt kho radios
+        setRadioValue('cha', customer.optionsChả || '');
+        setRadioValue('do', customer.optionsĐỗ || '');
+        setRadioValue('hanh', customer.optionsHành || '');
+        setRadioValue('nuocThit', customer.optionsNướcThịt || '');
+        // thịt kho toppings
+        form['thitKhoToppingTrung'].checked = customer.optionsToppingTrung || false;
+        form['thitKhoToppingChaCa'].checked = customer.optionsToppingChảCá || false;
+        // ruốc toppings
+        form['ruocToppingTrung'].checked = customer.optionsToppingTrungRuoc || false;
+        form['ruocToppingCha'].checked = customer.optionsToppingChảRuoc || false;
+        checkFormValidity();
+        submitBtn.textContent = 'Cập nhật';
+      }
+
       // Render customer list and summary from localStorage
       function renderCustomers() {
         let customers = JSON.parse(localStorage.getItem('xoiCustomers')||'[]');
@@ -613,7 +701,7 @@
         let totalQty = 0;
         let totalRevenue = 0;
 
-        for (let c of customers){
+        customers.forEach((c, index) => {
           totalQty += (c.thitKhoQty + c.ruocQty);
           totalRevenue += c.totalPrice;
 
@@ -660,9 +748,41 @@
           }
           innerHTML += '<p><strong>Tổng tiền:</strong> ' + formatMoney(c.totalPrice) + '</p>';
 
+          // Add edit and delete buttons
+          innerHTML +=
+            '<div class="action-buttons">' +
+            '<button type="button" class="action-btn edit" aria-label="Sửa khách hàng ' + escapeHTML(c.name) + '">Sửa</button>' +
+            '<button type="button" class="action-btn delete" aria-label="Xóa khách hàng ' + escapeHTML(c.name) + '">Xóa</button>' +
+            '</div>';
+
           card.innerHTML = innerHTML;
+
+          // Add event listeners for edit and delete
+          const editBtn = card.querySelector('button.edit');
+          const deleteBtn = card.querySelector('button.delete');
+
+          editBtn.addEventListener('click', () => {
+            editingIndex = index;
+            fillForm(c);
+            showForm();
+          });
+
+          deleteBtn.addEventListener('click', () => {
+            if(confirm('Bạn có chắc chắn muốn xóa khách hàng "' + c.name + '" không?')) {
+              let customers = JSON.parse(localStorage.getItem('xoiCustomers') || '[]');
+              customers.splice(index, 1);
+              localStorage.setItem('xoiCustomers', JSON.stringify(customers));
+              renderCustomers();
+              // If editing this customer, cancel editing
+              if(editingIndex === index) {
+                hideForm();
+                resetForm();
+              }
+            }
+          });
+
           customerListEl.appendChild(card);
-        }
+        });
         totalCustomersEl.textContent = 'Số khách hàng: ' + totalCustomers;
         totalQuantityEl.textContent = 'Tổng số suất bán ra: ' + totalQty;
         totalRevenueEl.textContent = 'Tổng tiền thu được: ' + formatMoney(totalRevenue);
@@ -718,32 +838,44 @@
         let totalPriceRuoc = ruocQty * (PRICE_XOI_RUOC + calculateRuocExtra());
         let totalPrice = totalPriceThitKho + totalPriceRuoc;
 
-        let customer = {
-          name, address, phone,
-          thitKhoQty, ruocQty,
-          optionsChả,
-          optionsĐỗ,
-          optionsHành,
-          optionsNướcThịt,
-          optionsToppingTrung,
-          optionsToppingChảCá,
-          optionsToppingTrungRuoc,
-          optionsToppingChảRuoc,
-          totalPrice
-        };
+        let customers = JSON.parse(localStorage.getItem('xoiCustomers') || '[]');
 
-        // Load current list
-        let customers = JSON.parse(localStorage.getItem('xoiCustomers')||'[]');
-        customers.push(customer);
+        if(editingIndex >= 0 && editingIndex < customers.length){
+          // Update existing
+          customers[editingIndex] = {
+            name, address, phone,
+            thitKhoQty, ruocQty,
+            optionsChả,
+            optionsĐỗ,
+            optionsHành,
+            optionsNướcThịt,
+            optionsToppingTrung,
+            optionsToppingChảCá,
+            optionsToppingTrungRuoc,
+            optionsToppingChảRuoc,
+            totalPrice
+          };
+        } else {
+          // Add new
+          customers.push({
+            name, address, phone,
+            thitKhoQty, ruocQty,
+            optionsChả,
+            optionsĐỗ,
+            optionsHành,
+            optionsNướcThịt,
+            optionsToppingTrung,
+            optionsToppingChảCá,
+            optionsToppingTrungRuoc,
+            optionsToppingChảRuoc,
+            totalPrice
+          });
+        }
+
         localStorage.setItem('xoiCustomers', JSON.stringify(customers));
 
-        // Reset form
-        form.reset();
-        thitKhoQtyInput.value = '0';
-        ruocQtyInput.value = '0';
-        submitBtn.disabled = true;
-
-        // Hide form
+        // Reset form and hide
+        resetForm();
         hideForm();
 
         // Render updated list and summary
@@ -752,8 +884,8 @@
 
       // Initial render on page load
       renderCustomers();
-
     })();
   </script>
 </body>
 </html>
+

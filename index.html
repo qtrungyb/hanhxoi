@@ -1,825 +1,619 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý bán xôi</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý đặt xôi thịt kho</title>
     <style>
-        body {
+        :root {
+            --primary-color: #FF6B6B;
+            --secondary-color: #4ECDC4;
+            --text-color: #333;
+            --light-gray: #f5f5f5;
+            --white: #ffffff;
+            --shadow: 0 2px 5px rgba(0,0,0,0.1);
+            --delivered-bg-color: rgba(30, 155, 130, 0.3);
+            --not-delivered-bg-color: rgba(255, 65, 65, 0.3);
+            --table-border-color: #ccc;
+        }
+
+        * {
+            box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5e8c9;
-            color: #5a3e1f;
+        }
+
+        body {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        
+
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: #fff9e6;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+            padding: 15px;
         }
-        
+
         h1 {
-            color: #d35400;
+            color: var(--primary-color);
             text-align: center;
-            margin-bottom: 30px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1.2px;
         }
-        
-        .add-customer-btn {
-            background-color: #e67e22;
+
+        /* Toggle button for showing form */
+        #toggle-form-btn {
+            background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 14px 20px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            width: 100%;
             margin-bottom: 20px;
-            transition: background-color 0.3s;
+            letter-spacing: 1px;
         }
-        
-        .add-customer-btn:hover {
-            background-color: #d35400;
+
+        #toggle-form-btn:hover {
+            background-color: #ff3b3b;
+            box-shadow: 0 4px 12px rgba(255, 59, 59, 0.6);
         }
-        
-        .customer-form {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            display: none;
-        }
-        
+
         .form-group {
-            margin-bottom: 15px;
+            background: var(--white);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            display: none; /* Hidden initially */
         }
-        
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .form-field {
+            flex: 1;
+            min-width: 150px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .form-field:last-child {
+            margin-right: 0;
+        }
+
         label {
             display: block;
             margin-bottom: 5px;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #444;
         }
-        
-        input, select {
+
+        input, textarea {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
+            padding: 10px;
+            border: 1.5px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
         }
-        
-        .menu-item {
-            background-color: #f9f1e0;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+
+        input:focus, textarea:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+            box-shadow: 0 0 6px var(--secondary-color);
         }
-        
-        .menu-item h3 {
-            color: #e67e22;
-            margin-top: 0;
+
+        .required label:after {
+            content: " *";
+            color: var(--primary-color);
         }
-        
-        .price {
-            font-weight: bold;
-            color: #d35400;
-        }
-        
-        .options {
-            margin-top: 10px;
-        }
-        
-        .option-group {
-            margin-bottom: 10px;
-        }
-        
-        .option-title {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .toppings {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .topping {
-            display: flex;
-            align-items: center;
-        }
-        
-        .topping input[type="checkbox"] {
-            width: auto;
-            margin-right: 5px;
-        }
-        
-        .quantity {
-            display: flex;
-            align-items: center;
-            margin-top: 10px;
-        }
-        
-        .quantity button {
-            background-color: #e67e22;
+
+        button#add-order {
+            background-color: var(--primary-color);
             color: white;
             border: none;
-            width: 30px;
-            height: 30px;
-            border-radius: 4px;
+            padding: 14px 20px;
+            border-radius: 6px;
             cursor: pointer;
+            font-size: 1rem;
+            font-weight: 700;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            width: 100%;
+            letter-spacing: 1px;
+            margin-top: 10px;
         }
-        
-        .quantity input {
-            width: 50px;
-            text-align: center;
-            margin: 0 10px;
+
+        button#add-order:hover {
+            background-color: #ff3b3b;
+            box-shadow: 0 4px 12px rgba(255, 59, 59, 0.6);
         }
-        
-        .form-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-        
-        .save-btn, .cancel-btn {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        
-        .save-btn {
-            background-color: #27ae60;
-            color: white;
-        }
-        
-        .cancel-btn {
-            background-color: #e74c3c;
-            color: white;
-        }
-        
+
         .customer-list {
-            margin-top: 30px;
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            overflow-x: auto;
         }
-        
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-        }
-        
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border: 1px solid #ddd; /* Thêm viền cho ô */
-        }
-        
-        th {
-            background-color: #e67e22;
-            color: white;
-            text-align: center; /* Căn giữa tiêu đề */
-        }
-        
-        tr:nth-child(even) {
-            background-color: #f9f1e0;
-        }
-        
-        tr:hover {
-            background-color: #f5e8c9;
-        }
-        
-        .action-btn {
-            padding: 5px 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 5px;
-        }
-        
-        .edit-btn {
-            background-color: #3498db;
-            color: white;
-        }
-        
-        .delete-btn {
-            background-color: #e74c3c;
-            color: white;
-        }
-        
-        .summary {
-            margin-top: 30px;
-            background-color: #f9f1e0;
-            padding: 20px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-around;
-            text-align: center;
-        }
-        
-        .summary-item {
-            flex: 1;
-        }
-        
-        .summary-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #d35400;
-        }
-        
-        .reset-btn {
-            display: block;
-            margin: 20px auto;
-            padding: 10px 20px;
-            background-color: #7f8c8d;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        
-        .notes {
-            font-size: 14px;
-            color: #7f8c8d;
-            margin-top: 5px;
-        }
-        
-        .highlight {
-            font-weight: bold;
-            color: #d35400;
+            border: 1px solid var(--table-border-color);
+            font-size: 0.95rem;
+            font-weight: 500;
         }
 
-        /* Tối ưu hóa cho điện thoại di động */
-        @media (max-width: 768px) {
-            .form-actions {
+        th, td {
+            padding: 14px 18px;
+            border: 1px solid var(--table-border-color);
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            user-select: none;
+            text-align: center;
+        }
+
+        td:nth-child(1), /* STT */
+        td:nth-child(2), /* Tên */
+        td:nth-child(3), /* Địa chỉ */
+        td:nth-child(4), /* SĐT */
+        td:nth-child(5), /* Số lượng */
+        td:nth-child(6), /* Thành tiền */
+        td:nth-child(7), /* Giao */
+        td:nth-child(8), /* Ghi chú */
+        td:nth-child(9)  /* Thao tác */
+         {
+            text-align: center;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
+        tr:hover {
+            background-color: #ffecec;
+            transition: background-color 0.25s ease;
+        }
+
+        .delivered {
+            background-color: var(--delivered-bg-color) !important;
+            color: #155d50;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .delivered:hover {
+            background-color: rgba(30, 155, 130, 0.45) !important;
+        }
+
+        .not-delivered {
+            background-color: var(--not-delivered-bg-color) !important;
+            color: #b22222;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .not-delivered:hover {
+            background-color: rgba(255, 65, 65, 0.45) !important;
+        }
+
+        .status-checkbox {
+            width: 22px;
+            height: 22px;
+            accent-color: var(--secondary-color);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            border-radius: 4px;
+        }
+
+        .status-checkbox:hover {
+            transform: scale(1.1);
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            margin-right: 6px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: box-shadow 0.3s ease;
+            user-select: none;
+        }
+
+        .action-btn:focus {
+            outline: 2px solid var(--secondary-color);
+            outline-offset: 2px;
+        }
+
+        .action-btn:hover {
+            box-shadow: 0 0 8px rgba(0,0,0,0.15);
+        }
+
+        .edit-btn {
+            background-color: #FFD166;
+            color: #333;
+            border: 1.5px solid #e6bb58;
+        }
+
+        .edit-btn:hover {
+            background-color: #f4bf3e;
+            color: #2c2c2c;
+        }
+
+        .delete-btn {
+            background-color: #EF476F;
+            color: white;
+            border: 1.5px solid #d33a62;
+        }
+
+        .delete-btn:hover {
+            background-color: #d43157;
+        }
+
+        .summary {
+            background: var(--white);
+            padding: 18px 15px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-top: 25px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-around;
+            gap: 30px;
+            color: #222;
+            letter-spacing: 0.8px;
+            font-size: 1.1rem;
+            user-select: none;
+        }
+
+        .summary div {
+            text-align: center;
+            flex: 1;
+        }
+
+        .summary-value {
+            font-size: 1.6rem;
+            color: var(--primary-color);
+            margin-top: 6px;
+            font-weight: 800;
+        }
+
+        @media (max-width: 600px) {
+            th, td {
+                padding: 10px 8px;
+                font-size: 0.86rem;
+            }
+
+            .action-btn {
+                padding: 4px 8px;
+                margin-right: 4px;
+                font-size: 0.75rem;
+            }
+
+            .form-field {
+                min-width: 100%;
+                margin-right: 0;
+            }
+
+            .summary {
                 flex-direction: column;
-                align-items: flex-start;
+                gap: 10px;
+                font-size: 1rem;
             }
-            .form-actions button {
-                width: 100%;
-                margin-bottom: 10px;
+
+            .summary-value {
+                font-size: 1.3rem;
             }
-            .quantity {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .quantity button {
-                width: 100%;
-            }
-            .quantity input {
-                width: auto;
+            #toggle-form-btn {
+                font-size: 1rem;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Quản lý bán xôi</h1>
-        
-        <button id="addCustomerBtn" class="add-customer-btn">+ Thêm khách hàng</button>
-        
-        <div id="customerForm" class="customer-form">
-            <div class="form-group">
-                <label for="customerName">Tên khách hàng:</label>
-                <input type="text" id="customerName" placeholder="Nhập tên khách hàng">
-            </div>
-            
-            <div class="form-group">
-                <label for="customerAddress">Địa chỉ:</label>
-                <input type="text" id="customerAddress" placeholder="Nhập địa chỉ">
-            </div>
-            
-            <div class="form-group">
-                <label for="customerPhone">Số điện thoại:</label>
-                <input type="text" id="customerPhone" placeholder="Nhập số điện thoại">
-            </div>
-            
-            <div class="menu-item">
-                <h3>Xôi thịt kho <span class="price">(25,000đ)</span></h3>
-                <div class="quantity">
-                    <button id="xoiThitKhoMinus">-</button>
-                    <input type="number" id="xoiThitKhoQty" value="0" min="0">
-                    <button id="xoiThitKhoPlus">+</button>
+        <h1>QUẢN LÝ ĐẶT XÔI THỊT KHO</h1>
+
+        <button id="toggle-form-btn" aria-expanded="false" aria-controls="order-form">Thêm đơn đặt</button>
+
+        <div class="form-group" id="order-form" aria-hidden="true">
+            <div class="form-row">
+                <div class="form-field required">
+                    <label for="customer-name">Tên khách hàng</label>
+                    <input type="text" id="customer-name" required />
                 </div>
-                
-                <div class="options">
-                    <div class="option-group">
-                        <div class="option-title">Chả:</div>
-                        <select id="xoiThitKhoCha">
-                            <option value="">Không chọn</option>
-                            <option value="nhiều chả">Nhiều chả</option>
-                            <option value="ít chả">Ít chả</option>
-                        </select>
-                    </div>
-                    
-                    <div class="option-group">
-                        <div class="option-title">Đỗ:</div>
-                        <select id="xoiThitKhoDo">
-                            <option value="">Không chọn</option>
-                            <option value="nhiều đỗ">Nhiều đỗ</option>
-                            <option value="ít đỗ">Ít đỗ</option>
-                        </select>
-                    </div>
-                    
-                    <div class="option-group">
-                        <div class="option-title">Hành:</div>
-                        <select id="xoiThitKhoHanh">
-                            <option value="">Không chọn</option>
-                            <option value="nhiều hành">Nhiều hành</option>
-                            <option value="ít hành">Ít hành</option>
-                            <option value="không hành">Không hành</option>
-                        </select>
-                    </div>
-                    
-                    <div class="option-group">
-                        <div class="option-title">Nước thịt:</div>
-                        <select id="xoiThitKhoNuocThit">
-                            <option value="">Không chọn</option>
-                            <option value="nhiều nước thịt">Nhiều nước thịt</option>
-                            <option value="ít nước thịt">Ít nước thịt</option>
-                            <option value="không nước thịt">Không nước thịt</option>
-                        </select>
-                    </div>
-                    
-                    <div class="option-group">
-                        <div class="option-title">Thêm topping:</div>
-                        <div class="toppings">
-                            <div class="topping">
-                                <input type="checkbox" id="xoiThitKhoTrungOp" value="trứng ốp (+5,000đ)">
-                                <label for="xoiThitKhoTrungOp">Trứng ốp (+5,000đ)</label>
-                            </div>
-                            <div class="topping">
-                                <input type="checkbox" id="xoiThitKhoChaCa" value="chả cá (+10,000đ)">
-                                <label for="xoiThitKhoChaCa">Chả cá (+10,000đ)</label>
-                            </div>
-                        </div>
-                    </div>
+                <div class="form-field">
+                    <label for="customer-phone">Số điện thoại</label>
+                    <input type="tel" id="customer-phone" />
                 </div>
             </div>
-            
-            <div class="menu-item">
-                <h3>Xôi ruốc <span class="price">(15,000đ)</span></h3>
-                <div class="quantity">
-                    <button id="xoiRuocMinus">-</button>
-                    <input type="number" id="xoiRuocQty" value="0" min="0">
-                    <button id="xoiRuocPlus">+</button>
-                </div>
-                
-                <div class="options">
-                    <div class="option-group">
-                        <div class="option-title">Thêm topping:</div>
-                        <div class="toppings">
-                            <div class="topping">
-                                <input type="checkbox" id="xoiRuocTrungOp" value="trứng ốp (+5,000đ)">
-                                <label for="xoiRuocTrungOp">Trứng ốp (+5,000đ)</label>
-                            </div>
-                            <div class="topping">
-                                <input type="checkbox" id="xoiRuocCha" value="chả (+10,000đ)">
-                                <label for="xoiRuocCha">Chả (+10,000đ)</label>
-                            </div>
-                        </div>
-                    </div>
+
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="customer-address">Địa chỉ</label>
+                    <input type="text" id="customer-address" />
                 </div>
             </div>
-            
-            <div class="form-actions">
-                <button id="cancelBtn" class="cancel-btn">Hủy</button>
-                <button id="saveBtn" class="save-btn">Lưu</button>
+
+            <div class="form-row">
+                <div class="form-field required">
+                    <label for="order-quantity">Số lượng suất</label>
+                    <input type="number" id="order-quantity" min="1" value="1" required />
+                </div>
+                <div class="form-field">
+                    <label for="order-note">Ghi chú</label>
+                    <input type="text" id="order-note" />
+                </div>
             </div>
+
+            <button id="add-order">THÊM ĐƠN ĐẶT</button>
         </div>
-        
+
         <div class="customer-list">
-            <h2>Danh sách khách hàng</h2>
-            <table id="customerTable">
+            <table id="orders-table" aria-label="Danh sách các đơn đặt xôi thịt kho">
                 <thead>
                     <tr>
-                        <th>STT</th>
-                        <th>Tên khách hàng</th>
-                        <th>Địa chỉ</th>
-                        <th>SĐT</th>
-                        <th>Đơn hàng</th>
-                        <th>Tổng tiền</th>
-                        <th>Thao tác</th>
+                        <th scope="col">STT</th>
+                        <th scope="col">Tên</th>
+                        <th scope="col">Địa chỉ</th>
+                        <th scope="col">SĐT</th>
+                        <th scope="col">Số lượng</th>
+                        <th scope="col">Thành tiền</th>
+                        <th scope="col">Giao</th>
+                        <th scope="col">Ghi chú</th>
+                        <th scope="col">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody id="customerTableBody">
-                    <!-- Danh sách khách hàng sẽ được thêm vào đây -->
+                <tbody id="orders-body">
+                    <!-- Orders will be added here -->
                 </tbody>
             </table>
         </div>
-        
-        <div class="summary">
-            <div class="summary-item">
-                <div>Tổng số khách hàng</div>
-                <div class="summary-value" id="totalCustomers">0</div>
+
+        <div class="summary" aria-live="polite" aria-atomic="true">
+            <div>
+                <div>Tổng suất</div>
+                <div class="summary-value" id="total-quantity">0</div>
             </div>
-            <div class="summary-item">
-                <div>Tổng số suất xôi</div>
-                <div class="summary-value" id="totalOrders">0</div>
-            </div>
-            <div class="summary-item">
-                <div>Tổng doanh thu</div>
-                <div class="summary-value" id="totalRevenue">0đ</div>
+            <div>
+                <div>Tổng tiền</div>
+                <div class="summary-value" id="total-amount">0đ</div>
             </div>
         </div>
-        
-        <button id="resetBtn" class="reset-btn">Reset dữ liệu</button>
     </div>
 
     <script>
-        // Biến lưu trữ danh sách khách hàng
-        let customers = JSON.parse(localStorage.getItem('xoiCustomers')) || [];
-        let editingIndex = -1;
-        
-        // DOM Elements
-        const addCustomerBtn = document.getElementById('addCustomerBtn');
-        const customerForm = document.getElementById('customerForm');
-        const customerTableBody = document.getElementById('customerTableBody');
-        const totalCustomersEl = document.getElementById('totalCustomers');
-        const totalOrdersEl = document.getElementById('totalOrders');
-        const totalRevenueEl = document.getElementById('totalRevenue');
-        const resetBtn = document.getElementById('resetBtn');
-        
-        // Hiển thị form thêm khách hàng
-        addCustomerBtn.addEventListener('click', () => {
-            customerForm.style.display = 'block';
-            resetForm();
-            editingIndex = -1;
-        });
-        
-        // Ẩn form khi click hủy
-        document.getElementById('cancelBtn').addEventListener('click', () => {
-            customerForm.style.display = 'none';
-        });
-        
-        // Xử lý nút lưu
-        document.getElementById('saveBtn').addEventListener('click', saveCustomer);
-        
-        // Xử lý nút reset
-        resetBtn.addEventListener('click', resetData);
-        
-        // Xử lý tăng giảm số lượng
-        setupQuantityButtons('xoiThitKho');
-        setupQuantityButtons('xoiRuoc');
-        
-        // Hiển thị danh sách khách hàng ban đầu
-        renderCustomerList();
-        updateSummary();
-        
-        // Hàm thiết lập nút tăng giảm số lượng
-        function setupQuantityButtons(prefix) {
-            const minusBtn = document.getElementById(`${prefix}Minus`);
-            const plusBtn = document.getElementById(`${prefix}Plus`);
-            const qtyInput = document.getElementById(`${prefix}Qty`);
-            
-            minusBtn.addEventListener('click', () => {
-                const currentValue = parseInt(qtyInput.value);
-                if (currentValue > 0) {
-                    qtyInput.value = currentValue - 1;
-                }
-            });
-            
-            plusBtn.addEventListener('click', () => {
-                const currentValue = parseInt(qtyInput.value);
-                qtyInput.value = currentValue + 1;
-            });
-        }
-        
-        // Hàm lưu khách hàng
-        function saveCustomer() {
-            const name = document.getElementById('customerName').value.trim();
-            const address = document.getElementById('customerAddress').value.trim();
-            const phone = document.getElementById('customerPhone').value.trim();
-            
-            // Lấy thông tin xôi thịt kho
-            const xoiThitKhoQty = parseInt(document.getElementById('xoiThitKhoQty').value);
-            const xoiThitKhoCha = document.getElementById('xoiThitKhoCha').value;
-            const xoiThitKhoDo = document.getElementById('xoiThitKhoDo').value;
-            const xoiThitKhoHanh = document.getElementById('xoiThitKhoHanh').value;
-            const xoiThitKhoNuocThit = document.getElementById('xoiThitKhoNuocThit').value;
-            const xoiThitKhoTrungOp = document.getElementById('xoiThitKhoTrungOp').checked;
-            const xoiThitKhoChaCa = document.getElementById('xoiThitKhoChaCa').checked;
-            
-            // Lấy thông tin xôi ruốc
-            const xoiRuocQty = parseInt(document.getElementById('xoiRuocQty').value);
-            const xoiRuocTrungOp = document.getElementById('xoiRuocTrungOp').checked;
-            const xoiRuocCha = document.getElementById('xoiRuocCha').checked;
-            
-            // Kiểm tra xem có đơn hàng nào không
-            if (xoiThitKhoQty === 0 && xoiRuocQty === 0) {
-                alert('Vui lòng chọn ít nhất một món xôi!');
-                return;
-            }
-            
-            // Tạo ghi chú cho xôi thịt kho
-            let xoiThitKhoNotes = [];
-            if (xoiThitKhoQty > 0) {
-                if (xoiThitKhoCha) xoiThitKhoNotes.push(xoiThitKhoCha);
-                if (xoiThitKhoDo) xoiThitKhoNotes.push(xoiThitKhoDo);
-                if (xoiThitKhoHanh) xoiThitKhoNotes.push(xoiThitKhoHanh);
-                if (xoiThitKhoNuocThit) xoiThitKhoNotes.push(xoiThitKhoNuocThit);
-                if (xoiThitKhoTrungOp) xoiThitKhoNotes.push('trứng ốp (+5,000đ)');
-                if (xoiThitKhoChaCa) xoiThitKhoNotes.push('chả cá (+10,000đ)');
-            }
-            
-            // Tạo ghi chú cho xôi ruốc
-            let xoiRuocNotes = [];
-            if (xoiRuocQty > 0) {
-                if (xoiRuocTrungOp) xoiRuocNotes.push('trứng ốp (+5,000đ)');
-                if (xoiRuocCha) xoiRuocNotes.push('chả (+10,000đ)');
-            }
-            
-            // Tính tổng tiền
-            let total = 0;
-            
-            // Tính tiền xôi thịt kho
-            let xoiThitKhoTotal = 0;
-            if (xoiThitKhoQty > 0) {
-                xoiThitKhoTotal = xoiThitKhoQty * 25000;
-                if (xoiThitKhoTrungOp) xoiThitKhoTotal += xoiThitKhoQty * 5000;
-                if (xoiThitKhoChaCa) xoiThitKhoTotal += xoiThitKhoQty * 10000;
-            }
-            
-            // Tính tiền xôi ruốc
-            let xoiRuocTotal = 0;
-            if (xoiRuocQty > 0) {
-                xoiRuocTotal = xoiRuocQty * 15000;
-                if (xoiRuocTrungOp) xoiRuocTotal += xoiRuocQty * 5000;
-                if (xoiRuocCha) xoiRuocTotal += xoiRuocQty * 10000;
-            }
-            
-            total = xoiThitKhoTotal + xoiRuocTotal;
-            
-            // Tạo đối tượng khách hàng
-            const customer = {
-                name,
-                address,
-                phone,
-                orders: [],
-                total
-            };
-            
-            if (xoiThitKhoQty > 0) {
-                customer.orders.push({
-                    name: 'Xôi thịt kho',
-                    quantity: xoiThitKhoQty,
-                    price: 25000,
-                    notes: xoiThitKhoNotes,
-                    total: xoiThitKhoTotal
-                });
-            }
-            
-            if (xoiRuocQty > 0) {
-                customer.orders.push({
-                    name: 'Xôi ruốc',
-                    quantity: xoiRuocQty,
-                    price: 15000,
-                    notes: xoiRuocNotes,
-                    total: xoiRuocTotal
-                });
-            }
-            
-            // Thêm hoặc cập nhật khách hàng
-            if (editingIndex === -1) {
-                customers.push(customer);
-            } else {
-                customers[editingIndex] = customer;
-            }
-            
-            // Lưu vào localStorage
-            localStorage.setItem('xoiCustomers', JSON.stringify(customers));
-            
-            // Cập nhật giao diện
-            renderCustomerList();
-            updateSummary();
-            
-            // Ẩn form và reset
-            customerForm.style.display = 'none';
-            resetForm();
-        }
-        
-        // Hàm hiển thị danh sách khách hàng
-        function renderCustomerList() {
-            customerTableBody.innerHTML = '';
-            
-            if (customers.length === 0) {
+        // Price per portion
+        const PRICE_PER_PORTION = 25000;
+
+        // Load orders from localStorage
+        let orders = JSON.parse(localStorage.getItem('xoiThitKhoOrders')) || [];
+        let editIndex = -1;
+
+        // DOM elements
+        const customerNameInput = document.getElementById('customer-name');
+        const customerPhoneInput = document.getElementById('customer-phone');
+        const customerAddressInput = document.getElementById('customer-address');
+        const orderQuantityInput = document.getElementById('order-quantity');
+        const orderNoteInput = document.getElementById('order-note');
+        const addOrderBtn = document.getElementById('add-order');
+        const ordersBody = document.getElementById('orders-body');
+        const totalQuantityEl = document.getElementById('total-quantity');
+        const totalAmountEl = document.getElementById('total-amount');
+        const toggleFormBtn = document.getElementById('toggle-form-btn');
+        const orderForm = document.getElementById('order-form');
+
+        // Render orders table
+        function renderOrders() {
+            ordersBody.innerHTML = '';
+            let totalQuantity = 0;
+            let totalAmount = 0;
+
+            orders.forEach((order, index) => {
                 const row = document.createElement('tr');
-                row.innerHTML = `<td colspan="7" style="text-align: center;">Chưa có khách hàng nào</td>`;
-                customerTableBody.appendChild(row);
-                return;
-            }
-            
-            customers.forEach((customer, index) => {
-                const row = document.createElement('tr');
-                
-                // Hiển thị thông tin cơ bản
+                row.className = order.delivered ? 'delivered' : 'not-delivered';
+
+                const amount = order.quantity * PRICE_PER_PORTION;
+                totalQuantity += order.quantity;
+                totalAmount += amount;
+
                 row.innerHTML = `
                     <td>${index + 1}</td>
-                    <td>${customer.name || '-'}</td>
-                    <td>${customer.address || '-'}</td>
-                    <td>${customer.phone || '-'}</td>
+                    <td>${order.name}</td>
+                    <td>${order.address || ''}</td>
+                    <td>${order.phone || ''}</td>
+                    <td>${order.quantity}</td>
+                    <td>${amount.toLocaleString()}đ</td>
+                    <td>
+                        <input 
+                            type="checkbox" 
+                            class="status-checkbox" 
+                            ${order.delivered ? 'checked' : ''} 
+                            data-index="${index}" 
+                            aria-label="Đánh dấu đơn hàng ${order.name} đã giao"
+                        >
+                    </td>
+                    <td>${order.note || ''}</td>
+                    <td>
+                        <button class="action-btn edit-btn" data-index="${index}" aria-label="Sửa đơn hàng của ${order.name}">Sửa</button>
+                        <button class="action-btn delete-btn" data-index="${index}" aria-label="Xóa đơn hàng của ${order.name}">Xóa</button>
+                    </td>
                 `;
-                
-                // Hiển thị đơn hàng
-                const ordersCell = document.createElement('td');
-                customer.orders.forEach(order => {
-                    const orderDiv = document.createElement('div');
-                    orderDiv.innerHTML = `
-                        <div><span class="highlight">${order.name}</span> x ${order.quantity}</div>
-                        ${order.notes.length > 0 ? `<div class="notes">(${order.notes.join(', ')})</div>` : ''}
-                    `;
-                    ordersCell.appendChild(orderDiv);
-                });
-                row.appendChild(ordersCell);
-                
-                // Hiển thị tổng tiền
-                const totalCell = document.createElement('td');
-                totalCell.textContent = `${customer.total.toLocaleString()}đ`;
-                row.appendChild(totalCell);
-                
-                // Thêm nút sửa/xóa
-                const actionsCell = document.createElement('td');
-                actionsCell.innerHTML = `
-                    <button class="action-btn edit-btn" data-index="${index}">Sửa</button>
-                    <button class="action-btn delete-btn" data-index="${index}">Xóa</button>
-                `;
-                row.appendChild(actionsCell);
-                
-                customerTableBody.appendChild(row);
+
+                ordersBody.appendChild(row);
             });
-            
-            // Thêm sự kiện cho nút sửa/xóa
+
+            // Update summary
+            totalQuantityEl.textContent = totalQuantity;
+            totalAmountEl.textContent = totalAmount.toLocaleString() + 'đ';
+
+            // Add event listeners to checkboxes
+            document.querySelectorAll('.status-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    const index = parseInt(this.dataset.index);
+                    orders[index].delivered = this.checked;
+                    saveOrders();
+                    renderOrders();
+                });
+            });
+
+            // Add event listeners to edit buttons
             document.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    editCustomer(parseInt(e.target.getAttribute('data-index')));
+                btn.addEventListener('click', function () {
+                    const index = parseInt(this.dataset.index);
+                    editOrder(index);
                 });
             });
-            
+
+            // Add event listeners to delete buttons
             document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    deleteCustomer(parseInt(e.target.getAttribute('data-index')));
+                btn.addEventListener('click', function () {
+                    const index = parseInt(this.dataset.index);
+                    if (confirm('Bạn có chắc chắn muốn xóa đơn này?')) {
+                        deleteOrder(index);
+                    }
                 });
             });
         }
-        
-        // Hàm sửa khách hàng
-        function editCustomer(index) {
-            editingIndex = index;
-            const customer = customers[index];
-            
-            // Điền thông tin cơ bản
-            document.getElementById('customerName').value = customer.name || '';
-            document.getElementById('customerAddress').value = customer.address || '';
-            document.getElementById('customerPhone').value = customer.phone || '';
-            
-            // Reset số lượng
-            document.getElementById('xoiThitKhoQty').value = 0;
-            document.getElementById('xoiRuocQty').value = 0;
-            
-            // Reset các lựa chọn
-            resetOptions('xoiThitKho');
-            resetOptions('xoiRuoc');
-            
-            // Điền thông tin đơn hàng
-            customer.orders.forEach(order => {
-                if (order.name === 'Xôi thịt kho') {
-                    document.getElementById('xoiThitKhoQty').value = order.quantity;
-                    
-                    order.notes.forEach(note => {
-                        if (note.includes('chả')) {
-                            if (note.includes('nhiều')) {
-                                document.getElementById('xoiThitKhoCha').value = 'nhiều chả';
-                            } else {
-                                document.getElementById('xoiThitKhoCha').value = 'ít chả';
-                            }
-                        } else if (note.includes('đỗ')) {
-                            if (note.includes('nhiều')) {
-                                document.getElementById('xoiThitKhoDo').value = 'nhiều đỗ';
-                            } else {
-                                document.getElementById('xoiThitKhoDo').value = 'ít đỗ';
-                            }
-                        } else if (note.includes('hành')) {
-                            if (note.includes('nhiều')) {
-                                document.getElementById('xoiThitKhoHanh').value = 'nhiều hành';
-                            } else if (note.includes('ít')) {
-                                document.getElementById('xoiThitKhoHanh').value = 'ít hành';
-                            } else {
-                                document.getElementById('xoiThitKhoHanh').value = 'không hành';
-                            }
-                        } else if (note.includes('nước thịt')) {
-                            if (note.includes('nhiều')) {
-                                document.getElementById('xoiThitKhoNuocThit').value = 'nhiều nước thịt';
-                            } else if (note.includes('ít')) {
-                                document.getElementById('xoiThitKhoNuocThit').value = 'ít nước thịt';
-                            } else {
-                                document.getElementById('xoiThitKhoNuocThit').value = 'không nước thịt';
-                            }
-                        } else if (note.includes('trứng ốp')) {
-                            document.getElementById('xoiThitKhoTrungOp').checked = true;
-                        } else if (note.includes('chả cá')) {
-                            document.getElementById('xoiThitKhoChaCa').checked = true;
-                        }
-                    });
-                } else if (order.name === 'Xôi ruốc') {
-                    document.getElementById('xoiRuocQty').value = order.quantity;
-                    
-                    order.notes.forEach(note => {
-                        if (note.includes('trứng ốp')) {
-                            document.getElementById('xoiRuocTrungOp').checked = true;
-                        } else if (note.includes('chả')) {
-                            document.getElementById('xoiRuocCha').checked = true;
-                        }
-                    });
+
+        // Save orders to localStorage
+        function saveOrders() {
+            localStorage.setItem('xoiThitKhoOrders', JSON.stringify(orders));
+        }
+
+        // Add or update order
+        function addOrder() {
+            const name = customerNameInput.value.trim();
+            const phone = customerPhoneInput.value.trim();
+            const address = customerAddressInput.value.trim();
+            const quantity = parseInt(orderQuantityInput.value);
+            const note = orderNoteInput.value.trim();
+
+            if (!name) {
+                alert('Vui lòng nhập tên khách hàng');
+                return;
+            }
+
+            if (isNaN(quantity) || quantity < 1) {
+                alert('Số lượng suất phải là số lớn hơn 0');
+                return;
+            }
+
+            const newOrder = {
+                name,
+                phone,
+                address,
+                quantity,
+                note,
+                delivered: false,
+            };
+
+            if (editIndex >= 0) {
+                orders[editIndex] = newOrder;
+                editIndex = -1;
+                addOrderBtn.textContent = 'THÊM ĐƠN ĐẶT';
+            } else {
+                orders.push(newOrder);
+            }
+
+            saveOrders();
+            renderOrders();
+
+            // Clear form and hide
+            customerNameInput.value = '';
+            customerPhoneInput.value = '';
+            customerAddressInput.value = '';
+            orderQuantityInput.value = '1';
+            orderNoteInput.value = '';
+
+            // Hide form after submission
+            toggleFormBtn.click();
+
+            // Focus on toggle button again
+            toggleFormBtn.focus();
+        }
+
+        // Edit order
+        function editOrder(index) {
+            const order = orders[index];
+            customerNameInput.value = order.name;
+            customerPhoneInput.value = order.phone || '';
+            customerAddressInput.value = order.address || '';
+            orderQuantityInput.value = order.quantity;
+            orderNoteInput.value = order.note || '';
+
+            editIndex = index;
+            addOrderBtn.textContent = 'CẬP NHẬT';
+
+            // Show form if hidden
+            if (orderForm.style.display === 'none' || orderForm.style.display === '') {
+                toggleFormBtn.click();
+            }
+
+            // Scroll to form smoothly
+            orderForm.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Delete order
+        function deleteOrder(index) {
+            orders.splice(index, 1);
+            saveOrders();
+            renderOrders();
+        }
+
+        // Toggle form visibility
+        toggleFormBtn.addEventListener('click', () => {
+            if (orderForm.style.display === 'none' || orderForm.style.display === '') {
+                orderForm.style.display = 'block';
+                toggleFormBtn.setAttribute('aria-expanded', 'true');
+                orderForm.setAttribute('aria-hidden', 'false');
+                // Focus first input
+                customerNameInput.focus();
+            } else {
+                orderForm.style.display = 'none';
+                toggleFormBtn.setAttribute('aria-expanded', 'false');
+                orderForm.setAttribute('aria-hidden', 'true');
+                // Reset form editing state if canceled
+                if (editIndex >= 0) {
+                    editIndex = -1;
+                    addOrderBtn.textContent = 'THÊM ĐƠN ĐẶT';
+
+                    // Clear form inputs
+                    customerNameInput.value = '';
+                    customerPhoneInput.value = '';
+                    customerAddressInput.value = '';
+                    orderQuantityInput.value = '1';
+                    orderNoteInput.value = '';
                 }
-            });
-            
-            // Hiển thị form
-            customerForm.style.display = 'block';
-        }
-        
-        // Hàm xóa khách hàng
-        function deleteCustomer(index) {
-            if (confirm('Bạn có chắc chắn muốn xóa khách hàng này?')) {
-                customers.splice(index, 1);
-                localStorage.setItem('xoiCustomers', JSON.stringify(customers));
-                renderCustomerList();
-                updateSummary();
+                toggleFormBtn.focus();
             }
-        }
-        
-        // Hàm cập nhật tổng kết
-        function updateSummary() {
-            const totalCustomers = customers.length;
-            let totalOrders = 0;
-            let totalRevenue = 0;
-            
-            customers.forEach(customer => {
-                customer.orders.forEach(order => {
-                    totalOrders += order.quantity;
-                });
-                totalRevenue += customer.total;
-            });
-            
-            totalCustomersEl.textContent = totalCustomers;
-            totalOrdersEl.textContent = totalOrders;
-            totalRevenueEl.textContent = `${totalRevenue.toLocaleString()}đ`;
-        }
-        
-        // Hàm reset form
-        function resetForm() {
-            document.getElementById('customerName').value = '';
-            document.getElementById('customerAddress').value = '';
-            document.getElementById('customerPhone').value = '';
-            document.getElementById('xoiThitKhoQty').value = 0;
-            document.getElementById('xoiRuocQty').value = 0;
-            
-            resetOptions('xoiThitKho');
-            resetOptions('xoiRuoc');
-        }
-        
-        // Hàm reset các lựa chọn
-        function resetOptions(prefix) {
-            if (prefix === 'xoiThitKho') {
-                document.getElementById('xoiThitKhoCha').value = '';
-                document.getElementById('xoiThitKhoDo').value = '';
-                document.getElementById('xoiThitKhoHanh').value = '';
-                document.getElementById('xoiThitKhoNuocThit').value = '';
-                document.getElementById('xoiThitKhoTrungOp').checked = false;
-                document.getElementById('xoiThitKhoChaCa').checked = false;
-            } else if (prefix === 'xoiRuoc') {
-                document.getElementById('xoiRuocTrungOp').checked = false;
-                document.getElementById('xoiRuocCha').checked = false;
-            }
-        }
-        
-        // Hàm reset toàn bộ dữ liệu
-        function resetData() {
-            if (confirm('Bạn có chắc chắn muốn xóa toàn bộ dữ liệu? Hành động này không thể hoàn tác.')) {
-                customers = [];
-                localStorage.removeItem('xoiCustomers');
-                renderCustomerList();
-                updateSummary();
-            }
-        }
-
-        // Hàm viết hoa chữ cái đầu
-        function capitalizeFirstLetter(string) {
-            return string.charAt(0).toUpperCase() + string.slice(1);
-        }
-
-        // Cập nhật sự kiện khi người dùng điền thông tin
-        document.getElementById('customerName').addEventListener('input', function() {
-            this.value = capitalizeFirstLetter(this.value);
         });
 
-        document.getElementById('customerAddress').addEventListener('input', function() {
-            this.value = capitalizeFirstLetter(this.value);
-        });
+        addOrderBtn.addEventListener('click', addOrder);
+
+        // Initialize table
+        renderOrders();
     </script>
 </body>
 </html>

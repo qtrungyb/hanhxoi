@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quản lý khách đặt xôi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
     <style>
         :root {
             --primary-color: #FF6B6B;
@@ -239,6 +240,12 @@
             font-weight: 600;
             transition: box-shadow 0.3s ease;
             user-select: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            min-width: 36px;
+            height: 32px;
         }
 
         .action-btn:focus {
@@ -269,6 +276,13 @@
 
         .delete-btn:hover {
             background-color: #d43157;
+        }
+
+        .material-icons {
+            font-size: 20px;
+            line-height: 1;
+            user-select: none;
+            pointer-events: none;
         }
 
         .summary {
@@ -309,6 +323,12 @@
                 padding: 4px 8px;
                 margin-right: 4px;
                 font-size: 0.75rem;
+                min-width: 28px;
+                height: 28px;
+            }
+
+            .material-icons {
+                font-size: 16px;
             }
 
             .form-field {
@@ -456,8 +476,8 @@
                     </td>
                     <td>${order.note || ''}</td>
                     <td>
-                        <button class="action-btn edit-btn" data-index="${index}" aria-label="Sửa đơn hàng của ${order.name}">Sửa</button>
-                        <button class="action-btn delete-btn" data-index="${index}" aria-label="Xóa đơn hàng của ${order.name}">Xóa</button>
+                        <button class="action-btn edit-btn" data-index="${index}" aria-label="Sửa đơn hàng của ${order.name}"><span class="material-icons" aria-hidden="true">edit</span></button>
+                        <button class="action-btn delete-btn" data-index="${index}" aria-label="Xóa đơn hàng của ${order.name}"><span class="material-icons" aria-hidden="true">delete</span></button>
                     </td>
                 `;
 
@@ -617,3 +637,4 @@
     </script>
 </body>
 </html>
+

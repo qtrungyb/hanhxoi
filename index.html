@@ -20,6 +20,7 @@
             text-align: center;
             margin-bottom: 20px;
             font-size: 1.5rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
         .container {
             max-width: 100%;
@@ -44,6 +45,7 @@
             position: sticky;
             top: 0;
             text-align: center;
+            font-weight: bold;
         }
         tr:nth-child(even) {
             background-color: #f9f9f9;
@@ -60,12 +62,14 @@
             accent-color: #28a745;
             display: block;
             margin: 0 auto;
+            cursor: pointer;
         }
         .drink-checkbox {
             width: 15px;
             height: 15px;
             accent-color: #ffc107;
             margin-right: 5px;
+            cursor: pointer;
         }
         .form-group {
             margin-bottom: 10px;
@@ -89,6 +93,11 @@
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         .btn-primary {
             background-color: #e74c3c;
@@ -124,6 +133,7 @@
             font-size: 1.3rem;
             font-weight: bold;
             color: #ffeb3b;
+            text-shadow: 0 0 5px rgba(255,235,59,0.5);
         }
         .error {
             color: #dc3545;
@@ -161,9 +171,10 @@
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
+            transition: color 0.3s;
         }
         .close:hover {
-            color: black;
+            color: #e74c3c;
         }
         .drink-options {
             display: flex;
@@ -184,12 +195,35 @@
             cursor: pointer;
             font-size: 1.1rem;
             margin: 0 5px;
+            transition: all 0.3s;
+        }
+        .action-btn:hover {
+            transform: scale(1.2);
         }
         .edit-btn {
             color: #3498db;
         }
         .delete-btn {
             color: #e74c3c;
+        }
+        .quantity-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            background-color: #e74c3c;
+            color: white;
+            font-weight: bold;
+            min-width: 30px;
+            text-align: center;
+        }
+        .price-highlight {
+            color: #e74c3c;
+            font-weight: bold;
+            text-shadow: 0 0 2px rgba(231,76,60,0.3);
+        }
+        .phone-highlight {
+            color: #3498db;
+            font-weight: bold;
         }
         @media (max-width: 600px) {
             th, td {
@@ -198,6 +232,10 @@
             }
             .form-control {
                 padding: 6px;
+            }
+            .drink-options {
+                flex-direction: column;
+                gap: 5px;
             }
         }
     </style>
@@ -303,14 +341,16 @@
                 
                 row.innerHTML = `
                     <td class="text-center">${index + 1}</td>
-                    <td>${order.name}</td>
+                    <td style="font-weight: bold;">${order.name}</td>
                     <td>${order.address || ''}</td>
-                    <td class="text-center">${order.phone || ''}</td>
-                    <td class="text-center">${order.quantity}</td>
-                    <td class="text-center">${totalPrice.toLocaleString()} đ</td>
+                    <td class="text-center phone-highlight">${order.phone || ''}</td>
+                    <td class="text-center">
+                        <span class="quantity-badge">x${order.quantity}</span>
+                    </td>
+                    <td class="text-center price-highlight">${totalPrice.toLocaleString()} đ</td>
                     <td class="text-center">
                         <input type="checkbox" class="status-checkbox" ${order.delivered ? 'checked' : ''} 
-                               onchange="toggleStatus(${index})">
+                               onchange="toggleStatus(${index})" title="${order.delivered ? 'Đã giao' : 'Chưa giao'}">
                     </td>
                     <td class="text-center">
                         <div class="drink-options">

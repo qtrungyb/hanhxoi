@@ -1,640 +1,468 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quản lý khách đặt xôi</title>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh Sách Đặt Xôi Thịt Kho</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        :root {
-            --primary-color: #FF6B6B;
-            --secondary-color: #4ECDC4;
-            --text-color: #333;
-            --light-gray: #f5f5f5;
-            --white: #ffffff;
-            --shadow: 0 2px 5px rgba(0,0,0,0.1);
-            --delivered-bg-color: rgba(30, 155, 130, 0.3);
-            --not-delivered-bg-color: rgba(255, 65, 65, 0.3);
-            --table-border-color: #ccc;
-        }
-
         * {
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
         body {
             margin: 0;
-            padding: 0;
-            background-color: var(--light-gray);
-            color: var(--text-color);
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            padding: 10px;
+            background-color: #f5f5f5;
         }
-
-        .container {
-            max-width: 100%;
-            padding: 15px;
-        }
-
         h1 {
-            color: var(--primary-color);
+            color: #e74c3c;
             text-align: center;
             margin-bottom: 20px;
-            font-size: 1.8rem;
-            font-weight: 700;
-            letter-spacing: 1.2px;
+            font-size: 1.5rem;
         }
-
-        /* Toggle button for showing form */
-        #toggle-form-btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 14px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1.1rem;
-            font-weight: 700;
-            transition: background-color 0.3s, box-shadow 0.3s;
-            width: 100%;
-            margin-bottom: 20px;
-            letter-spacing: 1px;
-        }
-
-        #toggle-form-btn:hover {
-            background-color: #ff3b3b;
-            box-shadow: 0 4px 12px rgba(255, 59, 59, 0.6);
-        }
-
-        .form-group {
-            background: var(--white);
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
-            display: none; /* Hidden initially */
-        }
-
-        .form-row {
-            display: flex;
-            flex-wrap: wrap;
-            margin-bottom: 10px;
-        }
-
-        .form-field {
-            flex: 1;
-            min-width: 150px;
-            margin-right: 10px;
-            margin-bottom: 10px;
-        }
-
-        .form-field:last-child {
-            margin-right: 0;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: #444;
-        }
-
-        input, textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1.5px solid #ddd;
-            border-radius: 6px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-        }
-
-        input:focus, textarea:focus {
-            border-color: var(--secondary-color);
-            outline: none;
-            box-shadow: 0 0 6px var(--secondary-color);
-        }
-
-        .required label:after {
-            content: " *";
-            color: var(--primary-color);
-        }
-
-        button#add-order {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 14px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 700;
-            transition: background-color 0.3s, box-shadow 0.3s;
-            width: 100%;
-            letter-spacing: 1px;
-            margin-top: 10px;
-        }
-
-        button#add-order:hover {
-            background-color: #ff3b3b;
-            box-shadow: 0 4px 12px rgba(255, 59, 59, 0.6);
-        }
-
-        .customer-list {
-            background: var(--white);
-            border-radius: 8px;
-            box-shadow: var(--shadow);
+        .container {
+            max-width: 100%;
             overflow-x: auto;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
-            border: 1px solid var(--table-border-color);
-            font-size: 0.95rem;
-            font-weight: 500;
+            margin-bottom: 20px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-
         th, td {
-            padding: 14px 18px;
-            border: 1px solid var(--table-border-color);
+            border: 1px solid #ddd;
+            padding: 8px 5px;
+            text-align: left;
+            font-size: 0.9rem;
         }
-
         th {
-            background-color: var(--primary-color);
+            background-color: #e74c3c;
             color: white;
-            font-weight: 700;
-            letter-spacing: 0.8px;
-            user-select: none;
+            position: sticky;
+            top: 0;
             text-align: center;
         }
-
-        td:nth-child(1), /* STT */
-        td:nth-child(2), /* Tên */
-        td:nth-child(3), /* Địa chỉ */
-        td:nth-child(4), /* SĐT */
-        td:nth-child(5), /* Số lượng */
-        td:nth-child(6), /* Thành tiền */
-        td:nth-child(7), /* Giao */
-        td:nth-child(8), /* Ghi chú */
-        td:nth-child(9)  /* Thao tác */
-         {
-            text-align: center;
-            color: var(--text-color);
-            font-weight: 500;
-        }
-
         tr:nth-child(even) {
-            background-color: #fafafa;
+            background-color: #f9f9f9;
         }
-
-        tr:hover {
-            background-color: #ffecec;
-            transition: background-color 0.25s ease;
-        }
-
         .delivered {
-            background-color: var(--delivered-bg-color) !important;
-            color: #155d50;
-            font-weight: 600;
-            transition: background-color 0.3s ease;
+            background-color: #d4edda;
         }
-
-        .delivered:hover {
-            background-color: rgba(30, 155, 130, 0.45) !important;
-        }
-
         .not-delivered {
-            background-color: var(--not-delivered-bg-color) !important;
-            color: #b22222;
-            font-weight: 600;
-            transition: background-color 0.3s ease;
+            background-color: #f8d7da;
         }
-
-        .not-delivered:hover {
-            background-color: rgba(255, 65, 65, 0.45) !important;
-        }
-
         .status-checkbox {
-            width: 22px;
-            height: 22px;
-            accent-color: var(--secondary-color);
-            cursor: pointer;
-            transition: transform 0.2s ease;
+            width: 20px;
+            height: 20px;
+            accent-color: #28a745;
+            display: block;
+            margin: 0 auto;
+        }
+        .drink-checkbox {
+            width: 15px;
+            height: 15px;
+            accent-color: #ffc107;
+            margin-right: 5px;
+        }
+        .form-group {
+            margin-bottom: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .form-control {
+            padding: 8px;
+            border: 1px solid #ddd;
             border-radius: 4px;
+            flex-grow: 1;
+            min-width: 120px;
         }
-
-        .status-checkbox:hover {
-            transform: scale(1.1);
+        .required {
+            border-color: #e74c3c;
         }
-
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+        .summary {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .summary-item {
+            margin: 10px 0;
+            font-size: 1.1rem;
+        }
+        .summary-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #ffeb3b;
+        }
+        .error {
+            color: #dc3545;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 5px;
+            animation: modalopen 0.3s;
+        }
+        @keyframes modalopen {
+            from {opacity: 0; transform: translateY(-50px)}
+            to {opacity: 1; transform: translateY(0)}
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
+        .drink-options {
+            display: flex;
+            gap: 15px;
+            margin: 10px 0;
+            justify-content: center;
+        }
+        .drink-option {
+            display: flex;
+            align-items: center;
+        }
+        .text-center {
+            text-align: center;
+        }
         .action-btn {
-            padding: 6px 12px;
-            margin-right: 6px;
-            border-radius: 6px;
+            background: none;
             border: none;
             cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: box-shadow 0.3s ease;
-            user-select: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            min-width: 36px;
-            height: 32px;
-        }
-
-        .action-btn:focus {
-            outline: 2px solid var(--secondary-color);
-            outline-offset: 2px;
-        }
-
-        .action-btn:hover {
-            box-shadow: 0 0 8px rgba(0,0,0,0.15);
-        }
-
-        .edit-btn {
-            background-color: #FFD166;
-            color: #333;
-            border: 1.5px solid #e6bb58;
-        }
-
-        .edit-btn:hover {
-            background-color: #f4bf3e;
-            color: #2c2c2c;
-        }
-
-        .delete-btn {
-            background-color: #EF476F;
-            color: white;
-            border: 1.5px solid #d33a62;
-        }
-
-        .delete-btn:hover {
-            background-color: #d43157;
-        }
-
-        .material-icons {
-            font-size: 20px;
-            line-height: 1;
-            user-select: none;
-            pointer-events: none;
-        }
-
-        .summary {
-            background: var(--white);
-            padding: 18px 15px;
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            margin-top: 25px;
-            font-weight: 700;
-            display: flex;
-            justify-content: space-around;
-            gap: 30px;
-            color: #222;
-            letter-spacing: 0.8px;
             font-size: 1.1rem;
-            user-select: none;
+            margin: 0 5px;
         }
-
-        .summary div {
-            text-align: center;
-            flex: 1;
+        .edit-btn {
+            color: #3498db;
         }
-
-        .summary-value {
-            font-size: 1.6rem;
-            color: var(--primary-color);
-            margin-top: 6px;
-            font-weight: 800;
+        .delete-btn {
+            color: #e74c3c;
         }
-
         @media (max-width: 600px) {
             th, td {
-                padding: 10px 8px;
-                font-size: 0.86rem;
+                padding: 6px 3px;
+                font-size: 0.8rem;
             }
-
-            .action-btn {
-                padding: 4px 8px;
-                margin-right: 4px;
-                font-size: 0.75rem;
-                min-width: 28px;
-                height: 28px;
-            }
-
-            .material-icons {
-                font-size: 16px;
-            }
-
-            .form-field {
-                min-width: 100%;
-                margin-right: 0;
-            }
-
-            .summary {
-                flex-direction: column;
-                gap: 10px;
-                font-size: 1rem;
-            }
-
-            .summary-value {
-                font-size: 1.3rem;
-            }
-            #toggle-form-btn {
-                font-size: 1rem;
+            .form-control {
+                padding: 6px;
             }
         }
     </style>
 </head>
 <body>
+    <h1>DANH SÁCH ĐẶT XÔI THỊT KHO</h1>
+    
     <div class="container">
-        <h1>QUẢN LÝ ĐẶT XÔI THỊT KHO</h1>
-
-        <button id="toggle-form-btn" aria-expanded="false" aria-controls="order-form">Thêm đơn đặt</button>
-
-        <div class="form-group" id="order-form" aria-hidden="true">
-            <div class="form-row">
-                <div class="form-field required">
-                    <label for="customer-name">Tên khách hàng</label>
-                    <input type="text" id="customer-name" required />
-                </div>
-                <div class="form-field">
-                    <label for="customer-phone">Số điện thoại</label>
-                    <input type="tel" id="customer-phone" />
-                </div>
+        <button id="addCustomerBtn" class="btn btn-success">
+            <i class="fas fa-plus"></i> Thêm khách hàng
+        </button>
+        
+        <table id="orderTable">
+            <thead>
+                <tr>
+                    <th width="5%">STT</th>
+                    <th width="15%">Tên</th>
+                    <th width="15%">Địa chỉ</th>
+                    <th width="10%">SĐT</th>
+                    <th width="8%">Số lượng</th>
+                    <th width="10%">Tiền</th>
+                    <th width="10%">Trạng thái</th>
+                    <th width="15%">Đồ uống</th>
+                    <th width="8%">Ghi chú</th>
+                    <th width="7%">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody id="orderList">
+                <!-- Danh sách sẽ được thêm vào đây -->
+            </tbody>
+        </table>
+        
+        <div class="summary">
+            <div class="summary-item">
+                Tổng số suất: <span class="summary-value" id="totalQuantity">0</span>
             </div>
-
-            <div class="form-row">
-                <div class="form-field">
-                    <label for="customer-address">Địa chỉ</label>
-                    <input type="text" id="customer-address" />
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-field required">
-                    <label for="order-quantity">Số lượng suất</label>
-                    <input type="number" id="order-quantity" min="1" value="1" required />
-                </div>
-                <div class="form-field">
-                    <label for="order-note">Ghi chú</label>
-                    <input type="text" id="order-note" />
-                </div>
-            </div>
-
-            <button id="add-order">THÊM ĐƠN ĐẶT</button>
-        </div>
-
-        <div class="customer-list">
-            <table id="orders-table" aria-label="Danh sách các đơn đặt xôi thịt kho">
-                <thead>
-                    <tr>
-                        <th scope="col">STT</th>
-                        <th scope="col">Tên</th>
-                        <th scope="col">Địa chỉ</th>
-                        <th scope="col">SĐT</th>
-                        <th scope="col">Số lượng</th>
-                        <th scope="col">Thành tiền</th>
-                        <th scope="col">Giao</th>
-                        <th scope="col">Ghi chú</th>
-                        <th scope="col">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody id="orders-body">
-                    <!-- Orders will be added here -->
-                </tbody>
-            </table>
-        </div>
-
-        <div class="summary" aria-live="polite" aria-atomic="true">
-            <div>
-                <div>Tổng suất</div>
-                <div class="summary-value" id="total-quantity">0</div>
-            </div>
-            <div>
-                <div>Tổng tiền</div>
-                <div class="summary-value" id="total-amount">0đ</div>
+            <div class="summary-item">
+                Tổng số tiền: <span class="summary-value" id="totalAmount">0</span> đ
             </div>
         </div>
     </div>
 
-    <script>
-        // Price per portion
-        const PRICE_PER_PORTION = 25000;
+    <!-- Modal thêm khách hàng -->
+    <div id="customerModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 style="text-align: center;">Thông tin khách hàng</h2>
+            <form id="orderForm">
+                <div class="form-group">
+                    <input type="text" id="customerName" class="form-control required" placeholder="Tên khách hàng*" required>
+                    <input type="text" id="customerAddress" class="form-control" placeholder="Địa chỉ">
+                </div>
+                <div class="form-group">
+                    <input type="tel" id="customerPhone" class="form-control" placeholder="Số điện thoại">
+                    <input type="number" id="quantity" class="form-control required" placeholder="Số lượng suất*" min="1" value="1" required>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="note" class="form-control" placeholder="Ghi chú">
+                </div>
+                <div style="text-align: center;">
+                    <button type="button" id="saveBtn" class="btn btn-primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-        // Load orders from localStorage
+    <script>
+        // Lưu trữ dữ liệu
         let orders = JSON.parse(localStorage.getItem('xoiThitKhoOrders')) || [];
         let editIndex = -1;
-
-        // DOM elements
-        const customerNameInput = document.getElementById('customer-name');
-        const customerPhoneInput = document.getElementById('customer-phone');
-        const customerAddressInput = document.getElementById('customer-address');
-        const orderQuantityInput = document.getElementById('order-quantity');
-        const orderNoteInput = document.getElementById('order-note');
-        const addOrderBtn = document.getElementById('add-order');
-        const ordersBody = document.getElementById('orders-body');
-        const totalQuantityEl = document.getElementById('total-quantity');
-        const totalAmountEl = document.getElementById('total-amount');
-        const toggleFormBtn = document.getElementById('toggle-form-btn');
-        const orderForm = document.getElementById('order-form');
-
-        // Render orders table
+        
+        // Giá mặc định
+        const PRICE_PER_MEAL = 25000;
+        const DRINK_PRICE = 5000;
+        
+        // DOM Elements
+        const orderList = document.getElementById('orderList');
+        const totalQuantity = document.getElementById('totalQuantity');
+        const totalAmount = document.getElementById('totalAmount');
+        const addCustomerBtn = document.getElementById('addCustomerBtn');
+        const modal = document.getElementById('customerModal');
+        const closeBtn = document.querySelector('.close');
+        const saveBtn = document.getElementById('saveBtn');
+        
+        // Hiển thị danh sách
         function renderOrders() {
-            ordersBody.innerHTML = '';
-            let totalQuantity = 0;
-            let totalAmount = 0;
-
+            orderList.innerHTML = '';
+            let totalQty = 0;
+            let totalAmt = 0;
+            
             orders.forEach((order, index) => {
                 const row = document.createElement('tr');
                 row.className = order.delivered ? 'delivered' : 'not-delivered';
-
-                const amount = order.quantity * PRICE_PER_PORTION;
-                totalQuantity += order.quantity;
-                totalAmount += amount;
-
+                
+                // Tính tiền
+                let drinkAmount = 0;
+                if (order.soyMilk) drinkAmount += DRINK_PRICE;
+                if (order.cornMilk) drinkAmount += DRINK_PRICE;
+                
+                const totalPrice = (PRICE_PER_MEAL * order.quantity) + drinkAmount;
+                totalQty += order.quantity;
+                totalAmt += totalPrice;
+                
                 row.innerHTML = `
-                    <td>${index + 1}</td>
+                    <td class="text-center">${index + 1}</td>
                     <td>${order.name}</td>
                     <td>${order.address || ''}</td>
-                    <td>${order.phone || ''}</td>
-                    <td>${order.quantity}</td>
-                    <td>${amount.toLocaleString()}đ</td>
-                    <td>
-                        <input 
-                            type="checkbox" 
-                            class="status-checkbox" 
-                            ${order.delivered ? 'checked' : ''} 
-                            data-index="${index}" 
-                            aria-label="Đánh dấu đơn hàng ${order.name} đã giao"
-                        >
+                    <td class="text-center">${order.phone || ''}</td>
+                    <td class="text-center">${order.quantity}</td>
+                    <td class="text-center">${totalPrice.toLocaleString()} đ</td>
+                    <td class="text-center">
+                        <input type="checkbox" class="status-checkbox" ${order.delivered ? 'checked' : ''} 
+                               onchange="toggleStatus(${index})">
+                    </td>
+                    <td class="text-center">
+                        <div class="drink-options">
+                            <label class="drink-option">
+                                <input type="checkbox" class="drink-checkbox" ${order.soyMilk ? 'checked' : ''} 
+                                       onchange="updateDrink(${index}, 'soyMilk', this.checked)">
+                                Sữa đậu
+                            </label>
+                            <label class="drink-option">
+                                <input type="checkbox" class="drink-checkbox" ${order.cornMilk ? 'checked' : ''} 
+                                       onchange="updateDrink(${index}, 'cornMilk', this.checked)">
+                                Sữa ngô
+                            </label>
+                        </div>
                     </td>
                     <td>${order.note || ''}</td>
-                    <td>
-                        <button class="action-btn edit-btn" data-index="${index}" aria-label="Sửa đơn hàng của ${order.name}"><span class="material-icons" aria-hidden="true">edit</span></button>
-                        <button class="action-btn delete-btn" data-index="${index}" aria-label="Xóa đơn hàng của ${order.name}"><span class="material-icons" aria-hidden="true">delete</span></button>
+                    <td class="text-center">
+                        <button onclick="editOrder(${index})" class="action-btn edit-btn" title="Sửa">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteOrder(${index})" class="action-btn delete-btn" title="Xóa">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
                     </td>
                 `;
-
-                ordersBody.appendChild(row);
+                
+                orderList.appendChild(row);
             });
-
-            // Update summary
-            totalQuantityEl.textContent = totalQuantity;
-            totalAmountEl.textContent = totalAmount.toLocaleString() + 'đ';
-
-            // Add event listeners to checkboxes
-            document.querySelectorAll('.status-checkbox').forEach(checkbox => {
-                checkbox.addEventListener('change', function () {
-                    const index = parseInt(this.dataset.index);
-                    orders[index].delivered = this.checked;
-                    saveOrders();
-                    renderOrders();
-                });
-            });
-
-            // Add event listeners to edit buttons
-            document.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    const index = parseInt(this.dataset.index);
-                    editOrder(index);
-                });
-            });
-
-            // Add event listeners to delete buttons
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    const index = parseInt(this.dataset.index);
-                    if (confirm('Bạn có chắc chắn muốn xóa đơn này?')) {
-                        deleteOrder(index);
-                    }
-                });
-            });
+            
+            totalQuantity.textContent = totalQty.toLocaleString();
+            totalAmount.textContent = totalAmt.toLocaleString();
         }
-
-        // Save orders to localStorage
-        function saveOrders() {
-            localStorage.setItem('xoiThitKhoOrders', JSON.stringify(orders));
-        }
-
-        // Add or update order
-        function addOrder() {
-            const name = customerNameInput.value.trim();
-            const phone = customerPhoneInput.value.trim();
-            const address = customerAddressInput.value.trim();
-            const quantity = parseInt(orderQuantityInput.value);
-            const note = orderNoteInput.value.trim();
-
-            if (!name) {
-                alert('Vui lòng nhập tên khách hàng');
+        
+        // Thêm hoặc cập nhật đơn hàng
+        function addOrUpdateOrder() {
+            const name = document.getElementById('customerName').value.trim();
+            const address = document.getElementById('customerAddress').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const note = document.getElementById('note').value.trim();
+            
+            if (!name || isNaN(quantity) || quantity < 1) {
+                alert('Vui lòng nhập tên và số lượng hợp lệ!');
                 return;
             }
-
-            if (isNaN(quantity) || quantity < 1) {
-                alert('Số lượng suất phải là số lớn hơn 0');
-                return;
-            }
-
-            const newOrder = {
+            
+            const order = {
                 name,
-                phone,
                 address,
+                phone,
                 quantity,
+                soyMilk: false,
+                cornMilk: false,
                 note,
-                delivered: false,
+                delivered: false
             };
-
-            if (editIndex >= 0) {
-                orders[editIndex] = newOrder;
-                editIndex = -1;
-                addOrderBtn.textContent = 'THÊM ĐƠN ĐẶT';
+            
+            if (editIndex === -1) {
+                orders.push(order);
             } else {
-                orders.push(newOrder);
+                // Giữ nguyên trạng thái đồ uống khi cập nhật
+                order.soyMilk = orders[editIndex].soyMilk;
+                order.cornMilk = orders[editIndex].cornMilk;
+                order.delivered = orders[editIndex].delivered;
+                orders[editIndex] = order;
+                editIndex = -1;
+                saveBtn.textContent = 'Lưu';
             }
-
-            saveOrders();
+            
+            saveToLocalStorage();
             renderOrders();
-
-            // Clear form and hide
-            customerNameInput.value = '';
-            customerPhoneInput.value = '';
-            customerAddressInput.value = '';
-            orderQuantityInput.value = '1';
-            orderNoteInput.value = '';
-
-            // Hide form after submission
-            toggleFormBtn.click();
-
-            // Focus on toggle button again
-            toggleFormBtn.focus();
+            modal.style.display = 'none';
+            document.getElementById('orderForm').reset();
+            document.getElementById('quantity').value = 1; // Reset về 1
         }
-
-        // Edit order
+        
+        // Chỉnh sửa đơn hàng
         function editOrder(index) {
             const order = orders[index];
-            customerNameInput.value = order.name;
-            customerPhoneInput.value = order.phone || '';
-            customerAddressInput.value = order.address || '';
-            orderQuantityInput.value = order.quantity;
-            orderNoteInput.value = order.note || '';
-
+            document.getElementById('customerName').value = order.name;
+            document.getElementById('customerAddress').value = order.address || '';
+            document.getElementById('customerPhone').value = order.phone || '';
+            document.getElementById('quantity').value = order.quantity;
+            document.getElementById('note').value = order.note || '';
+            
             editIndex = index;
-            addOrderBtn.textContent = 'CẬP NHẬT';
-
-            // Show form if hidden
-            if (orderForm.style.display === 'none' || orderForm.style.display === '') {
-                toggleFormBtn.click();
-            }
-
-            // Scroll to form smoothly
-            orderForm.scrollIntoView({ behavior: 'smooth' });
+            saveBtn.textContent = 'Cập nhật';
+            modal.style.display = 'block';
         }
-
-        // Delete order
+        
+        // Xóa đơn hàng
         function deleteOrder(index) {
-            orders.splice(index, 1);
-            saveOrders();
+            if (confirm('Bạn có chắc chắn muốn xóa đơn hàng này?')) {
+                orders.splice(index, 1);
+                saveToLocalStorage();
+                renderOrders();
+            }
+        }
+        
+        // Cập nhật đồ uống
+        function updateDrink(index, drinkType, isChecked) {
+            orders[index][drinkType] = isChecked;
+            saveToLocalStorage();
             renderOrders();
         }
-
-        // Toggle form visibility
-        toggleFormBtn.addEventListener('click', () => {
-            if (orderForm.style.display === 'none' || orderForm.style.display === '') {
-                orderForm.style.display = 'block';
-                toggleFormBtn.setAttribute('aria-expanded', 'true');
-                orderForm.setAttribute('aria-hidden', 'false');
-                // Focus first input
-                customerNameInput.focus();
-            } else {
-                orderForm.style.display = 'none';
-                toggleFormBtn.setAttribute('aria-expanded', 'false');
-                orderForm.setAttribute('aria-hidden', 'true');
-                // Reset form editing state if canceled
-                if (editIndex >= 0) {
-                    editIndex = -1;
-                    addOrderBtn.textContent = 'THÊM ĐƠN ĐẶT';
-
-                    // Clear form inputs
-                    customerNameInput.value = '';
-                    customerPhoneInput.value = '';
-                    customerAddressInput.value = '';
-                    orderQuantityInput.value = '1';
-                    orderNoteInput.value = '';
-                }
-                toggleFormBtn.focus();
+        
+        // Thay đổi trạng thái giao hàng
+        function toggleStatus(index) {
+            orders[index].delivered = !orders[index].delivered;
+            saveToLocalStorage();
+            renderOrders();
+        }
+        
+        // Lưu vào localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('xoiThitKhoOrders', JSON.stringify(orders));
+        }
+        
+        // Sự kiện click nút thêm khách hàng
+        addCustomerBtn.addEventListener('click', function() {
+            editIndex = -1;
+            document.getElementById('orderForm').reset();
+            document.getElementById('quantity').value = 1;
+            saveBtn.textContent = 'Lưu';
+            modal.style.display = 'block';
+        });
+        
+        // Sự kiện click nút đóng modal
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+        
+        // Sự kiện click bên ngoài modal để đóng
+        window.addEventListener('click', function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
             }
         });
-
-        addOrderBtn.addEventListener('click', addOrder);
-
-        // Initialize table
+        
+        // Sự kiện click nút lưu
+        saveBtn.addEventListener('click', addOrUpdateOrder);
+        
+        // Sự kiện nhấn Enter trong form
+        document.getElementById('orderForm').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addOrUpdateOrder();
+            }
+        });
+        
+        // Hiển thị danh sách khi tải trang
         renderOrders();
     </script>
 </body>
 </html>
-

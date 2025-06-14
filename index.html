@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh Sách Đặt Xôi Thịt Kho</title>
+    <title>Quản Lý Đặt Xôi Thịt Kho</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
@@ -13,51 +13,104 @@
         body {
             margin: 0;
             padding: 10px;
-            background-color: #f5f5f5;
+            background-color: #f8f9fa;
+            background-image: linear-gradient(135deg, #f9f5e8 0%, #f0e6d2 100%);
+        }
+        .header {
+            background: linear-gradient(135deg, #c0392b, #e74c3c);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
         }
         h1 {
-            color: #e74c3c;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.5rem;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            margin: 0;
+            font-size: 1.8rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
         }
         .container {
             max-width: 100%;
             overflow-x: auto;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .search-box {
+            flex-grow: 1;
+            max-width: 300px;
+            position: relative;
+        }
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7f8c8d;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 10px 10px 10px 35px;
+            border: 1px solid #ddd;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        .search-box input:focus {
+            outline: none;
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
             background-color: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-radius: 10px;
+            overflow: hidden;
         }
         th, td {
-            border: 1px solid #ddd;
-            padding: 8px 5px;
+            border: 1px solid #eee;
+            padding: 12px 8px;
             text-align: left;
             font-size: 0.9rem;
         }
         th {
-            background-color: #e74c3c;
+            background: linear-gradient(to bottom, #e74c3c, #c0392b);
             color: white;
             position: sticky;
             top: 0;
             text-align: center;
             font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
         }
         tr:nth-child(even) {
-            background-color: #f9f9f9;
+            background-color: #fcf9f5;
         }
         .delivered {
             background-color: #e8f5e9;
         }
         .not-delivered {
-            background-color: #ffebee;
+            background-color: #fff8e1;
         }
         
-        /* Custom Checkbox Styles - Updated with more vibrant colors */
+        /* Custom Checkbox Styles */
         .status-checkbox {
             -webkit-appearance: none;
             -moz-appearance: none;
@@ -133,14 +186,16 @@
             border-radius: 20px;
             transition: all 0.3s;
             font-weight: 500;
+            background: rgba(231, 76, 60, 0.05);
+            margin: 2px;
         }
         .drink-option:hover {
             background-color: rgba(231, 76, 60, 0.1);
         }
         
-        /* Highlight elements to match quantity and price colors */
+        /* Highlight elements */
         .name-highlight {
-            color: #e74c3c;
+            color: #c0392b;
             font-weight: bold;
         }
         .address-highlight {
@@ -152,124 +207,170 @@
         }
         .quantity-badge {
             display: inline-block;
-            padding: 3px 8px;
-            border-radius: 10px;
-            background-color: #e74c3c;
+            padding: 5px 10px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
             color: white;
             font-weight: bold;
-            min-width: 30px;
+            min-width: 35px;
             text-align: center;
-            box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .price-highlight {
-            color: #e74c3c;
+            color: #c0392b;
             font-weight: bold;
             font-size: 1.05rem;
-            text-shadow: 0 0 2px rgba(231,76,60,0.3);
         }
         .note-highlight {
             color: #7f8c8d;
             font-style: italic;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .note-highlight:hover {
+            white-space: normal;
+            overflow: visible;
+            background: white;
+            position: absolute;
+            z-index: 10;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 8px;
+            border-radius: 5px;
         }
         
-        /* Rest of your CSS remains the same */
         .form-group {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 15px;
         }
         .form-control {
-            padding: 8px;
+            padding: 12px 15px;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 8px;
             flex-grow: 1;
-            min-width: 120px;
+            min-width: 150px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
         }
         .required {
             border-color: #e74c3c;
         }
         .btn {
-            padding: 8px 15px;
+            padding: 12px 20px;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.95rem;
         }
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .btn:active {
+            transform: translateY(-1px);
         }
         .btn-primary {
-            background-color: #e74c3c;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
             color: white;
         }
         .btn-success {
-            background-color: #2ecc71;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
             color: white;
         }
         .btn-danger {
-            background-color: #dc3545;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
             color: white;
         }
         .btn-sm {
-            padding: 5px 10px;
-            font-size: 0.8rem;
+            padding: 8px 15px;
+            font-size: 0.9rem;
         }
         .summary {
             background: linear-gradient(135deg, #e74c3c, #c0392b);
             color: white;
-            padding: 15px;
-            border-radius: 8px;
+            padding: 20px;
+            border-radius: 10px;
             margin-top: 20px;
             font-weight: bold;
             text-align: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
         }
         .summary-item {
-            margin: 10px 0;
+            margin: 10px;
             font-size: 1.1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .summary-label {
+            margin-bottom: 5px;
         }
         .summary-value {
-            font-size: 1.3rem;
+            font-size: 1.8rem;
             font-weight: bold;
             color: #ffeb3b;
             text-shadow: 0 0 5px rgba(255,235,59,0.5);
         }
         .error {
-            color: #dc3545;
-            font-size: 0.8rem;
+            color: #ffeb3b;
+            font-size: 0.9rem;
             margin-top: 5px;
+            text-align: center;
         }
         .modal {
             display: none;
             position: fixed;
-            z-index: 1;
+            z-index: 1000;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.4);
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(3px);
         }
         .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 15px;
             width: 90%;
             max-width: 500px;
-            border-radius: 5px;
-            animation: modalopen 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+            animation: modalopen 0.4s;
+            border: 1px solid #eee;
         }
         @keyframes modalopen {
-            from {opacity: 0; transform: translateY(-50px)}
+            from {opacity: 0; transform: translateY(-60px)}
             to {opacity: 1; transform: translateY(0)}
         }
         .close {
             color: #aaa;
-            float: right;
+            position: absolute;
+            top: 15px;
+            right: 20px;
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
@@ -281,8 +382,9 @@
         .drink-options {
             display: flex;
             gap: 15px;
-            margin: 10px 0;
+            margin: 15px 0;
             justify-content: center;
+            flex-wrap: wrap;
         }
         .text-center {
             text-align: center;
@@ -294,9 +396,16 @@
             font-size: 1.1rem;
             margin: 0 5px;
             transition: all 0.3s;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         .action-btn:hover {
-            transform: scale(1.2);
+            transform: scale(1.15);
+            background: rgba(0,0,0,0.05);
         }
         .edit-btn {
             color: #3498db;
@@ -304,38 +413,108 @@
         .delete-btn {
             color: #e74c3c;
         }
-        @media (max-width: 600px) {
+        .view-btn {
+            color: #2ecc71;
+        }
+        .modal-title {
+            text-align: center;
+            color: #c0392b;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        .required-star {
+            color: #e74c3c;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #7f8c8d;
+        }
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #e0e0e0;
+        }
+        @media (max-width: 768px) {
             th, td {
-                padding: 6px 3px;
+                padding: 10px 6px;
                 font-size: 0.8rem;
             }
             .form-control {
-                padding: 6px;
+                padding: 10px;
+                width: 100%;
             }
             .drink-options {
                 flex-direction: column;
-                gap: 5px;
+                gap: 8px;
+            }
+            .summary {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .action-buttons {
+                flex-wrap: wrap;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+        @media (max-width: 480px) {
+            .header {
+                padding: 15px 10px;
+            }
+            h1 {
+                font-size: 1.3rem;
+            }
+            .btn {
+                padding: 10px 15px;
+                font-size: 0.85rem;
+            }
+            .summary-item {
+                width: 100%;
+            }
+            .modal-content {
+                padding: 20px 15px;
             }
         }
     </style>
 </head>
 <body>
-    <h1>DANH SÁCH ĐẶT XÔI THỊT KHO</h1>
+    <div class="header">
+        <h1><i class="fas fa-utensils"></i> QUẢN LÝ ĐẶT XÔI THỊT KHO</h1>
+    </div>
     
     <div class="container">
-        <button id="addCustomerBtn" class="btn btn-success">
-            <i class="fas fa-plus"></i> Thêm khách hàng
-        </button>
+        <div class="controls">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Tìm kiếm đơn hàng...">
+            </div>
+            <div class="action-buttons">
+                <button id="addCustomerBtn" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Thêm đơn hàng
+                </button>
+                <button id="clearAllBtn" class="btn btn-warning">
+                    <i class="fas fa-trash-alt"></i> Xóa tất cả
+                </button>
+            </div>
+        </div>
         
         <table id="orderTable">
             <thead>
                 <tr>
                     <th width="5%">STT</th>
-                    <th width="15%">Tên</th>
+                    <th width="15%">Tên khách hàng</th>
                     <th width="15%">Địa chỉ</th>
                     <th width="10%">SĐT</th>
                     <th width="8%">Số lượng</th>
-                    <th width="10%">Tiền</th>
+                    <th width="10%">Thành tiền</th>
                     <th width="10%">Trạng thái</th>
                     <th width="15%">Đồ uống</th>
                     <th width="8%">Ghi chú</th>
@@ -349,33 +528,71 @@
         
         <div class="summary">
             <div class="summary-item">
-                Tổng số suất: <span class="summary-value" id="totalQuantity">0</span>
+                <div class="summary-label">Tổng số suất</div>
+                <div class="summary-value" id="totalQuantity">0</div>
             </div>
             <div class="summary-item">
-                Tổng số tiền: <span class="summary-value" id="totalAmount">0</span> đ
+                <div class="summary-label">Tổng số đơn</div>
+                <div class="summary-value" id="totalOrders">0</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Tổng doanh thu</div>
+                <div class="summary-value" id="totalAmount">0</div>
+                <div>VNĐ</div>
             </div>
         </div>
     </div>
 
-    <!-- Modal thêm khách hàng -->
+    <!-- Modal thêm/cập nhật đơn hàng -->
     <div id="customerModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2 style="text-align: center;">Thông tin khách hàng</h2>
+            <h2 class="modal-title" id="modalTitle">Thêm đơn hàng mới</h2>
             <form id="orderForm">
                 <div class="form-group">
-                    <input type="text" id="customerName" class="form-control required" placeholder="Tên khách hàng*" required>
-                    <input type="text" id="customerAddress" class="form-control" placeholder="Địa chỉ">
+                    <div style="flex: 1;">
+                        <label class="form-label">Tên khách hàng <span class="required-star">*</span></label>
+                        <input type="text" id="customerName" class="form-control" placeholder="Nhập tên khách hàng" required>
+                    </div>
+                    <div style="flex: 1;">
+                        <label class="form-label">Số điện thoại</label>
+                        <input type="tel" id="customerPhone" class="form-control" placeholder="Nhập số điện thoại">
+                    </div>
                 </div>
+                
                 <div class="form-group">
-                    <input type="tel" id="customerPhone" class="form-control" placeholder="Số điện thoại">
-                    <input type="number" id="quantity" class="form-control required" placeholder="Số lượng suất*" min="1" value="1" required>
+                    <div style="flex: 1;">
+                        <label class="form-label">Địa chỉ</label>
+                        <input type="text" id="customerAddress" class="form-control" placeholder="Nhập địa chỉ giao hàng">
+                    </div>
+                    <div style="flex: 1;">
+                        <label class="form-label">Số lượng <span class="required-star">*</span></label>
+                        <input type="number" id="quantity" class="form-control" placeholder="Số suất" min="1" value="1" required>
+                    </div>
                 </div>
+                
                 <div class="form-group">
-                    <input type="text" id="note" class="form-control" placeholder="Ghi chú">
+                    <div style="flex: 1;">
+                        <label class="form-label">Ghi chú</label>
+                        <input type="text" id="note" class="form-control" placeholder="Ghi chú đặc biệt">
+                    </div>
                 </div>
-                <div style="text-align: center;">
-                    <button type="button" id="saveBtn" class="btn btn-primary">Lưu</button>
+                
+                <div class="drink-options">
+                    <label class="drink-option">
+                        <input type="checkbox" id="soyMilk" class="drink-checkbox">
+                        Sữa đậu (+5.000đ)
+                    </label>
+                    <label class="drink-option">
+                        <input type="checkbox" id="cornMilk" class="drink-checkbox">
+                        Sữa ngô (+5.000đ)
+                    </label>
+                </div>
+                
+                <div class="text-center" style="margin-top: 20px;">
+                    <button type="button" id="saveBtn" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Lưu đơn hàng
+                    </button>
                 </div>
             </form>
         </div>
@@ -393,19 +610,43 @@
         // DOM Elements
         const orderList = document.getElementById('orderList');
         const totalQuantity = document.getElementById('totalQuantity');
+        const totalOrders = document.getElementById('totalOrders');
         const totalAmount = document.getElementById('totalAmount');
         const addCustomerBtn = document.getElementById('addCustomerBtn');
+        const clearAllBtn = document.getElementById('clearAllBtn');
         const modal = document.getElementById('customerModal');
         const closeBtn = document.querySelector('.close');
         const saveBtn = document.getElementById('saveBtn');
+        const modalTitle = document.getElementById('modalTitle');
+        const searchInput = document.getElementById('searchInput');
         
         // Hiển thị danh sách
-        function renderOrders() {
+        function renderOrders(filteredOrders = null) {
+            const ordersToRender = filteredOrders || orders;
             orderList.innerHTML = '';
+            
+            if (ordersToRender.length === 0) {
+                orderList.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <h3>Chưa có đơn hàng nào</h3>
+                            <p>Hãy thêm đơn hàng mới bằng nút "Thêm đơn hàng"</p>
+                        </td>
+                    </tr>
+                `;
+                
+                totalQuantity.textContent = '0';
+                totalOrders.textContent = '0';
+                totalAmount.textContent = '0';
+                return;
+            }
+            
             let totalQty = 0;
             let totalAmt = 0;
+            const totalOrderCount = ordersToRender.length;
             
-            orders.forEach((order, index) => {
+            ordersToRender.forEach((order, index) => {
                 const row = document.createElement('tr');
                 row.className = order.delivered ? 'delivered' : 'not-delivered';
                 
@@ -421,36 +662,29 @@
                 row.innerHTML = `
                     <td class="text-center">${index + 1}</td>
                     <td class="name-highlight">${order.name}</td>
-                    <td class="address-highlight">${order.address || ''}</td>
-                    <td class="text-center phone-highlight">${order.phone || ''}</td>
+                    <td class="address-highlight">${order.address || '---'}</td>
+                    <td class="text-center phone-highlight">${order.phone || '---'}</td>
                     <td class="text-center">
-                        <span class="quantity-badge">x${order.quantity}</span>
+                        <span class="quantity-badge">${order.quantity}</span>
                     </td>
                     <td class="text-center price-highlight">${totalPrice.toLocaleString()} đ</td>
                     <td class="text-center">
                         <input type="checkbox" class="status-checkbox" ${order.delivered ? 'checked' : ''} 
-                               onchange="toggleStatus(${index})" title="${order.delivered ? 'Đã giao' : 'Chưa giao'}">
+                               onchange="toggleStatus(${orders.indexOf(order)})" title="${order.delivered ? 'Đã giao' : 'Chưa giao'}">
                     </td>
                     <td class="text-center">
                         <div class="drink-options">
-                            <label class="drink-option">
-                                <input type="checkbox" class="drink-checkbox" ${order.soyMilk ? 'checked' : ''} 
-                                       onchange="updateDrink(${index}, 'soyMilk', this.checked)">
-                                Sữa đậu
-                            </label>
-                            <label class="drink-option">
-                                <input type="checkbox" class="drink-checkbox" ${order.cornMilk ? 'checked' : ''} 
-                                       onchange="updateDrink(${index}, 'cornMilk', this.checked)">
-                                Sữa ngô
-                            </label>
+                            ${order.soyMilk ? '<div class="drink-option">Sữa đậu</div>' : ''}
+                            ${order.cornMilk ? '<div class="drink-option">Sữa ngô</div>' : ''}
+                            ${!order.soyMilk && !order.cornMilk ? '---' : ''}
                         </div>
                     </td>
-                    <td class="note-highlight">${order.note || ''}</td>
+                    <td class="note-highlight" title="${order.note || ''}">${order.note || '---'}</td>
                     <td class="text-center">
-                        <button onclick="editOrder(${index})" class="action-btn edit-btn" title="Sửa">
+                        <button onclick="editOrder(${orders.indexOf(order)})" class="action-btn edit-btn" title="Sửa">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button onclick="deleteOrder(${index})" class="action-btn delete-btn" title="Xóa">
+                        <button onclick="deleteOrder(${orders.indexOf(order)})" class="action-btn delete-btn" title="Xóa">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </td>
@@ -460,6 +694,7 @@
             });
             
             totalQuantity.textContent = totalQty.toLocaleString();
+            totalOrders.textContent = totalOrderCount.toLocaleString();
             totalAmount.textContent = totalAmt.toLocaleString();
         }
         
@@ -470,9 +705,19 @@
             const phone = document.getElementById('customerPhone').value.trim();
             const quantity = parseInt(document.getElementById('quantity').value);
             const note = document.getElementById('note').value.trim();
+            const soyMilk = document.getElementById('soyMilk').checked;
+            const cornMilk = document.getElementById('cornMilk').checked;
             
-            if (!name || isNaN(quantity) || quantity < 1) {
-                alert('Vui lòng nhập tên và số lượng hợp lệ!');
+            // Validate
+            if (!name) {
+                alert('Vui lòng nhập tên khách hàng!');
+                document.getElementById('customerName').focus();
+                return;
+            }
+            
+            if (isNaN(quantity) || quantity < 1) {
+                alert('Số lượng suất phải là số lớn hơn 0!');
+                document.getElementById('quantity').focus();
                 return;
             }
             
@@ -481,29 +726,27 @@
                 address,
                 phone,
                 quantity,
-                soyMilk: false,
-                cornMilk: false,
+                soyMilk,
+                cornMilk,
                 note,
-                delivered: false
+                delivered: false,
+                date: new Date().toISOString()
             };
             
             if (editIndex === -1) {
+                // Thêm mới
                 orders.push(order);
             } else {
-                // Giữ nguyên trạng thái đồ uống khi cập nhật
-                order.soyMilk = orders[editIndex].soyMilk;
-                order.cornMilk = orders[editIndex].cornMilk;
+                // Cập nhật
                 order.delivered = orders[editIndex].delivered;
                 orders[editIndex] = order;
                 editIndex = -1;
-                saveBtn.textContent = 'Lưu';
             }
             
             saveToLocalStorage();
             renderOrders();
-            modal.style.display = 'none';
-            document.getElementById('orderForm').reset();
-            document.getElementById('quantity').value = 1; // Reset về 1
+            closeModal();
+            showNotification(editIndex === -1 ? 'Đã thêm đơn hàng thành công!' : 'Đã cập nhật đơn hàng!');
         }
         
         // Chỉnh sửa đơn hàng
@@ -514,9 +757,12 @@
             document.getElementById('customerPhone').value = order.phone || '';
             document.getElementById('quantity').value = order.quantity;
             document.getElementById('note').value = order.note || '';
+            document.getElementById('soyMilk').checked = order.soyMilk;
+            document.getElementById('cornMilk').checked = order.cornMilk;
             
             editIndex = index;
-            saveBtn.textContent = 'Cập nhật';
+            modalTitle.textContent = 'Cập nhật đơn hàng';
+            saveBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Cập nhật';
             modal.style.display = 'block';
         }
         
@@ -526,14 +772,20 @@
                 orders.splice(index, 1);
                 saveToLocalStorage();
                 renderOrders();
+                showNotification('Đã xóa đơn hàng thành công!');
             }
         }
         
-        // Cập nhật đồ uống
-        function updateDrink(index, drinkType, isChecked) {
-            orders[index][drinkType] = isChecked;
-            saveToLocalStorage();
-            renderOrders();
+        // Xóa tất cả đơn hàng
+        function clearAllOrders() {
+            if (orders.length === 0) return;
+            
+            if (confirm('Bạn có chắc chắn muốn xóa TẤT CẢ đơn hàng? Hành động này không thể hoàn tác.')) {
+                orders = [];
+                saveToLocalStorage();
+                renderOrders();
+                showNotification('Đã xóa tất cả đơn hàng!');
+            }
         }
         
         // Thay đổi trạng thái giao hàng
@@ -541,6 +793,26 @@
             orders[index].delivered = !orders[index].delivered;
             saveToLocalStorage();
             renderOrders();
+            showNotification(`Đã ${orders[index].delivered ? 'đánh dấu đã giao' : 'chuyển về chưa giao'}!`);
+        }
+        
+        // Tìm kiếm đơn hàng
+        function searchOrders() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            
+            if (!searchTerm) {
+                renderOrders();
+                return;
+            }
+            
+            const filtered = orders.filter(order => 
+                order.name.toLowerCase().includes(searchTerm) ||
+                (order.phone && order.phone.includes(searchTerm)) ||
+                (order.address && order.address.toLowerCase().includes(searchTerm)) ||
+                (order.note && order.note.toLowerCase().includes(searchTerm))
+            );
+            
+            renderOrders(filtered);
         }
         
         // Lưu vào localStorage
@@ -548,37 +820,67 @@
             localStorage.setItem('xoiThitKhoOrders', JSON.stringify(orders));
         }
         
-        // Sự kiện click nút thêm khách hàng
-        addCustomerBtn.addEventListener('click', function() {
-            editIndex = -1;
+        // Hiển thị thông báo
+        function showNotification(message) {
+            // Tạo một phần tử thông báo
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.style.position = 'fixed';
+            notification.style.bottom = '20px';
+            notification.style.right = '20px';
+            notification.style.backgroundColor = '#2ecc71';
+            notification.style.color = 'white';
+            notification.style.padding = '15px 25px';
+            notification.style.borderRadius = '8px';
+            notification.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+            notification.style.zIndex = '1000';
+            notification.style.fontWeight = 'bold';
+            notification.style.opacity = '0';
+            notification.style.transition = 'opacity 0.3s';
+            document.body.appendChild(notification);
+            
+            // Hiệu ứng xuất hiện
+            setTimeout(() => {
+                notification.style.opacity = '1';
+            }, 10);
+            
+            // Tự động biến mất sau 3 giây
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        // Đóng modal
+        function closeModal() {
+            modal.style.display = 'none';
             document.getElementById('orderForm').reset();
             document.getElementById('quantity').value = 1;
-            saveBtn.textContent = 'Lưu';
+            modalTitle.textContent = 'Thêm đơn hàng mới';
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Lưu đơn hàng';
+            editIndex = -1;
+        }
+        
+        // Sự kiện
+        addCustomerBtn.addEventListener('click', function() {
             modal.style.display = 'block';
         });
         
-        // Sự kiện click nút đóng modal
-        closeBtn.addEventListener('click', function() {
-            modal.style.display = 'none';
-        });
+        clearAllBtn.addEventListener('click', clearAllOrders);
         
-        // Sự kiện click bên ngoài modal để đóng
+        closeBtn.addEventListener('click', closeModal);
+        
         window.addEventListener('click', function(event) {
             if (event.target == modal) {
-                modal.style.display = 'none';
+                closeModal();
             }
         });
         
-        // Sự kiện click nút lưu
         saveBtn.addEventListener('click', addOrUpdateOrder);
         
-        // Sự kiện nhấn Enter trong form
-        document.getElementById('orderForm').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                addOrUpdateOrder();
-            }
-        });
+        searchInput.addEventListener('input', searchOrders);
         
         // Hiển thị danh sách khi tải trang
         renderOrders();
